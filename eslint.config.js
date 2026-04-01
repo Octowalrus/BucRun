@@ -8,8 +8,8 @@ export default [
       "dist/**",
       "build/**",
       ".next/**",
-      "coverage/**"
-    ]
+      "coverage/**",
+    ],
   },
   js.configs.recommended,
   {
@@ -19,11 +19,11 @@ export default [
       sourceType: "module",
       globals: {
         ...globals.node,
-        ...globals.browser
-      }
+        ...globals.browser,
+      },
     },
     rules: {
-      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
-    }
-  }
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+    },
+  },
 ];
