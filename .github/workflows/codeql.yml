@@ -38,14 +38,14 @@ jobs:
     # -----------------------------
     - name: Run ESLint
       run: |
-        npm eslint . --max-warnings=0
+        npx eslint . --max-warnings=0
 
     # -----------------------------
     # ✅ Run Prettier check
     # -----------------------------
     - name: Run Prettier
       run: |
-        npm prettier --check .
+        npx prettier --check .
 
     # -----------------------------
     # CodeQL
