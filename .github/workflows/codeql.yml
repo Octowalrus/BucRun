@@ -31,12 +31,7 @@ jobs:
       with:
         node-version: '20'
 
-    # -----------------------------
-    # ✅ Install dependencies
-    # -----------------------------
-    - name: Install dependencies
-      run: |
-        npm install
+   
 
     # -----------------------------
     # ✅ Run ESLint (FAILS on bad style)
