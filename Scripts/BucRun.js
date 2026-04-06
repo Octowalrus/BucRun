@@ -18,7 +18,13 @@ let background = {
   y: 0,
   speed: 0.5,
 };
+let background = {
+  x: 0,
+  y: 0,
+  speed: 0.5,
+};
 
+let keys = {};
 let keys = {};
 
 // Listen for key presses
@@ -51,7 +57,14 @@ function update() {
 function draw() {
   // Clear screen
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+function draw() {
+  // Clear screen
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Draw player
+  ctx.fillStyle = "lime";
+  ctx.fillRect(player.x, player.y, player.size, player.size);
+}
   // Draw player
   ctx.fillStyle = "lime";
   ctx.fillRect(player.x, player.y, player.size, player.size);
@@ -62,5 +75,11 @@ function gameLoop() {
   draw();
   requestAnimationFrame(gameLoop);
 }
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
 
+gameLoop();
 gameLoop();
