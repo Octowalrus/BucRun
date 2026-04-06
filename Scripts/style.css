@@ -1,9 +1,5 @@
-body {
-  background-color: lightblue;
-  overflow: hidden;
-}
-#gameCanvas {
-  background: gray;
+canvas {
+  background: black;
   display: block;
   margin: auto;
 }
