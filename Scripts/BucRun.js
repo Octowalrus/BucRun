@@ -100,10 +100,23 @@ function draw() {
   ctx.drawImage(currentSprite, player.x, player.y, player.size, player.size);
 }
 
-function gameLoop() {
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
+function mainLoop() {
+  // clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // switch statement to change between the screens
+  switch (currentScreen) {
+    case 'menu':
+      drawMainMenu();
+      break;
+    case 'playing':
+      update();
+      drawGame();
+      break;
+  }
+
+  // call the function again
+  requestAnimationFrame(mainLoop);
 }
 
 // wait until all images are loaded
