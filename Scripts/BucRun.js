@@ -1,13 +1,18 @@
-let currentScreen = "menu";
+let currentScreen = 'menu';
 
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const groundY = 350;
 
 let player = {
-  x: 50,
-  y: 50,
+  x: 20,
+  y: 350,
   size: 30,
   speed: 3,
+  velocityY: 0,
+  gravity: 0.35,
+  onGround: true,
 };
 /*
 let background = {
@@ -19,39 +24,55 @@ let background = {
 let keys = {};
 
 // Listen for key presses
-document.addEventListener("keydown", (e) => {
-  keys[e.key] = true;
-});
+document.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
 
-document.addEventListener("keyup", (e) => {
-  keys[e.key] = false;
-});
+  const key = e.key.toLowerCase();
 
-canvas.addEventListener("click", () => {
-  if (currentScreen === "menu") {
-    currentScreen = "playing"; // Transition from menu to game
+  if (key === 'w' || key === ' ' || (key === 'arrowup' && player.onGround)) {
+    player.velocityY = -player.speed * 3;
+    player.onGround = false;
   }
 });
 
-function update() {}
+document.addEventListener('keyup', (e) => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+canvas.addEventListener('click', () => {
+  if (currentScreen === 'menu') {
+    currentScreen = 'playing'; // Transition from menu to game
+  }
+});
+
+function update() {
+  player.velocityY += player.gravity;
+  player.y += player.velocityY;
+
+  if (player.y >= groundY) {
+    player.y = groundY;
+    player.velocityY = 0;
+    player.onGround = true;
+  }
+}
 
 function drawMainMenu() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // make the title text
-  ctx.fillStyle = "white";
-  ctx.font = "50px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("BUC RUN", canvas.width / 2, 100);
+  ctx.fillStyle = 'white';
+  ctx.font = '50px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('BUC RUN', canvas.width / 2, 100);
 
   // draw the start button
-  ctx.fillStyle = "#eeaa00";
+  ctx.fillStyle = '#eeaa00';
   ctx.fillRect(canvas.width / 2 - 100, 200, 200, 60);
 
   // text in button
-  ctx.fillStyle = "black";
-  ctx.font = "30px Arial";
-  ctx.fillText("START", canvas.width / 2, 240);
+  ctx.fillStyle = 'black';
+  ctx.font = '30px Arial';
+  ctx.fillText('START', canvas.width / 2, 240);
 }
 
 function drawGame() {
@@ -59,7 +80,7 @@ function drawGame() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Draw player
-  ctx.fillStyle = "lime";
+  ctx.fillStyle = 'lime';
   ctx.fillRect(player.x, player.y, player.size, player.size);
 }
 
@@ -69,10 +90,10 @@ function mainLoop() {
 
   // switch statement to change between the screens
   switch (currentScreen) {
-    case "menu":
+    case 'menu':
       drawMainMenu();
       break;
-    case "playing":
+    case 'playing':
       update();
       drawGame();
       break;
