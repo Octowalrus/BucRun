@@ -1,3 +1,4 @@
+let currentScreen = 'menu';
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -41,29 +42,32 @@ document.addEventListener("keydown", (e) => {
     player.state = "prejump";
     player.prejumpTimer = 6; // how many frames to show prejump
     jumpQueued = true;
-    player.onGround = false;
+  }
+});
+
+canvas.addEventListener('click', () => {
+  if (currentScreen === 'menu') {
+    currentScreen = 'playing'; // Transition from menu to game
   }
 });
 
 function update() {
-  // handle prejump delay
   if (player.state === "prejump") {
     player.prejumpTimer--;
 
     if (player.prejumpTimer <= 0 && jumpQueued) {
       player.velocityY = -player.speed * 3;
       player.state = "jump";
+      player.onGround = false;   // move it here
       jumpQueued = false;
     }
   }
 
-  // apply gravity only after actual jump starts
-  if (player.state === "jump" || !player.onGround) {
+  if (!player.onGround) {
     player.velocityY += player.gravity;
     player.y += player.velocityY;
   }
 
-  // landing check
   if (player.y >= groundY) {
     const wasInAir = !player.onGround || player.state === "jump";
 
@@ -72,13 +76,12 @@ function update() {
 
     if (wasInAir && player.state !== "land" && player.state !== "prejump") {
       player.state = "land";
-      player.landingTimer = 6; // how many frames to show landing
+      player.landingTimer = 6;
     }
 
     player.onGround = true;
   }
 
-  // landing animation timer
   if (player.state === "land") {
     player.landingTimer--;
 
@@ -86,6 +89,25 @@ function update() {
       player.state = "stand";
     }
   }
+}
+
+function drawMainMenu() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // make the title text
+  ctx.fillStyle = 'white';
+  ctx.font = '50px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('BUC RUN', canvas.width / 2, 100);
+
+  // draw the start button
+  ctx.fillStyle = '#eeaa00';
+  ctx.fillRect(canvas.width / 2 - 100, 200, 200, 60);
+
+  // text in button
+  ctx.fillStyle = 'black';
+  ctx.font = '30px Arial';
+  ctx.fillText('START', canvas.width / 2, 240);
 }
 
 function draw() {
@@ -100,6 +122,12 @@ function draw() {
   ctx.drawImage(currentSprite, player.x, player.y, player.size, player.size);
 }
 
+function gameLoop() {
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
 function mainLoop() {
   // clear canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -110,8 +138,9 @@ function mainLoop() {
       drawMainMenu();
       break;
     case 'playing':
+      case 'playing':
       update();
-      drawGame();
+      draw();
       break;
   }
 
@@ -127,7 +156,7 @@ for (let key in sprites) {
   sprites[key].onload = () => {
     loadedCount++;
     if (loadedCount === totalImages) {
-      gameLoop();
+      mainLoop();
     }
   };
 }
