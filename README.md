@@ -27,7 +27,7 @@
 ## Coding Standards
 
 - Camel Case
-- Single Tab indentation ( 4 spaces )
+- Single Tab indentation ( 2 spaces )
 - Functions at bottom of file
 - Main and imports at top of file
 
