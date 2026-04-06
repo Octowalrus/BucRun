@@ -34,7 +34,7 @@ document.addEventListener('keydown', (e) => {
 
   const key = e.key.toLowerCase();
 
-  if (key === 'w' || key === ' ' || (key === 'arrowup' && player.onGround)) {
+  if ((key === 'w' || key === ' ' || key === 'arrowup') && player.onGround) {
     player.velocityY = -player.speed * 3;
     player.onGround = false;
   }
