@@ -9,13 +9,13 @@ let player = {
   size: 30,
   speed: 3,
 };
-
+/*
 let background = {
   x: 0,
   y: 0,
   speed: 0.5,
 };
-
+*/
 let keys = {};
 
 // Listen for key presses
