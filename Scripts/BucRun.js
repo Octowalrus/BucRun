@@ -18,13 +18,7 @@ let background = {
   y: 0,
   speed: 0.5,
 };
-let background = {
-  x: 0,
-  y: 0,
-  speed: 0.5,
-};
 
-let keys = {};
 let keys = {};
 
 // Listen for key presses
