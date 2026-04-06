@@ -1,5 +1,22 @@
-canvas {
-  background: black;
+body{
+  background-color: lightblue;
+  overflow: hidden;
+}
+#gameCanvas {
+  background: gray;
   display: block;
   margin: auto;
+}
+.body-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+.game-container {
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
 }
