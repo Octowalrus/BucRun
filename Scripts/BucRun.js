@@ -1,47 +1,85 @@
-const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+let currentScreen = 'menu';
 
-    let player = {
-        x: 50,
-        y: 50,
-        size: 30,
-        speed: 3
-    };
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-    let background = {
-        x: 0,
-        y: 0,
-        speed: 0.5
-    }
+let player = {
+  x: 50,
+  y: 50,
+  size: 30,
+  speed: 3,
+};
 
-    let keys = {};
+let background = {
+  x: 0,
+  y: 0,
+  speed: 0.5,
+};
 
-    // Listen for key presses
-    document.addEventListener("keydown", (e) => {
-        keys[e.key] = true;
-    });
+let keys = {};
 
-    document.addEventListener("keyup", (e) => {
-        keys[e.key] = false;
-    });
+// Listen for key presses
+document.addEventListener('keydown', (e) => {
+  keys[e.key] = true;
+});
 
-    function update() {
-        
-    }
+document.addEventListener('keyup', (e) => {
+  keys[e.key] = false;
+});
 
-    function draw() {
-        // Clear screen
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+canvas.addEventListener('click', () => {
+  if (currentScreen === 'menu') {
+    currentScreen = 'playing'; // Transition from menu to game
+  }
+});
 
-        // Draw player
-        ctx.fillStyle = "lime";
-        ctx.fillRect(player.x, player.y, player.size, player.size);
-    }
+function update() {}
 
-    function gameLoop() {
-        update();
-        draw();
-        requestAnimationFrame(gameLoop);
-    }
+function drawMainMenu() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    gameLoop();
+  // make the title text
+  ctx.fillStyle = 'white';
+  ctx.font = '50px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('BUC RUN', canvas.width / 2, 100);
+
+  // draw the start button
+  ctx.fillStyle = '#eeaa00';
+  ctx.fillRect(canvas.width / 2 - 100, 200, 200, 60);
+
+  // text in button
+  ctx.fillStyle = 'black';
+  ctx.font = '30px Arial';
+  ctx.fillText('START', canvas.width / 2, 240);
+}
+
+function drawGame() {
+  // Clear screen
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw player
+  ctx.fillStyle = 'lime';
+  ctx.fillRect(player.x, player.y, player.size, player.size);
+}
+
+function mainLoop() {
+  // clear canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // switch statement to change between the screens
+  switch (currentScreen) {
+    case 'menu':
+      drawMainMenu();
+      break;
+    case 'playing':
+      update();
+      drawGame();
+      break;
+  }
+
+  // call the function again
+  requestAnimationFrame(mainLoop);
+}
+
+mainLoop();
