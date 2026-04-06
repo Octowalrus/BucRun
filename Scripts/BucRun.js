@@ -14,13 +14,13 @@ let player = {
   gravity: 0.35,
   onGround: true,
 };
-/*
+
 let background = {
   x: 0,
   y: 0,
   speed: 0.5,
 };
-*/
+
 let keys = {};
 
 // Listen for key presses
