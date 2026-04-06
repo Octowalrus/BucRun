@@ -8,8 +8,13 @@ const groundY = 350;
 let player = {
   x: 20,
   y: 350,
+  x: 20,
+  y: 350,
   size: 30,
   speed: 3,
+  velocityY: 0,
+  gravity: 0.35,
+  onGround: true,
   velocityY: 0,
   gravity: 0.35,
   onGround: true,
