@@ -25,7 +25,7 @@ let player = {
   size: 50,
   speed: 10,
   velocityY: 0,
-  gravity: .3,
+  gravity: 0.3,
   onGround: true,
 
   state: "stand",
@@ -87,7 +87,7 @@ function update() {
     } else {
       player.velocityY += player.gravity * 3; // normal gravity
     }
-// update y position based on velocity
+    // update y position based on velocity
     player.y += player.velocityY;
   }
   // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
