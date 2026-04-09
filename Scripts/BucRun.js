@@ -9,12 +9,17 @@ const SPRITES = {
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
+  background0: new Image(),
+  background3: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = "Assets/BuckyJumping.png";
 SPRITES.land.src = "Assets/BuckyLanding.png";
 SPRITES.prejump.src = "Assets/BuckyPreJump.png";
 SPRITES.stand.src = "Assets/BuckyRunning.png";
+SPRITES.background0.src = "Assets/roadsidewalktrees.png";
+SPRITES.background3.src = "Assets/sunsky.png";
+
 
 const GROUND_Y = 350;
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
@@ -32,6 +37,15 @@ let player = {
   prejumpTimer: 0,
   landingTimer: 0,
 };
+//background object with properties for position, speed, and parallax
+let background = {
+  x0: 0, //road and trees
+  x1: 0,
+  x2: 0,
+  x3: 0, //sun and sky
+  speed: 4,
+  parallax: 0.8
+}
 
 let jumpQueued = false;
 let jumpKeyHeld = false;
@@ -65,6 +79,21 @@ CANVAS.addEventListener("click", () => {
     currentScreen = "playing"; // Transition from menu to game
   }
 });
+// function to handle background moving and rendering
+function backgroundF() {
+  background.x0 -= background.speed;
+  background.x1 -= background.speed * background.parallax;
+  background.x2 -= background.speed * background.parallax * background.parallax;
+  if(background.x0 <= -1600) {
+    background.x0 = 0;
+  }
+  CTX.drawImage(SPRITES.background3, background.x3, 0);
+  CTX.drawImage(SPRITES.background0, background.x0, 0);
+  CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
+  
+  
+}
+
 // main update function to handle player movement, jumping, and landing logic
 function update() {
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
@@ -142,7 +171,7 @@ function drawMainMenu() {
 // draws the player's current sprite based on the state
 function draw() {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
+  backgroundF();
   let currentSprite = SPRITES.stand;
 
   if (player.state === "prejump") currentSprite = SPRITES.prejump;
@@ -169,6 +198,7 @@ function mainLoop() {
       break;
     case "playing":
     case "playing":
+      
       update();
       draw();
       break;
