@@ -84,14 +84,14 @@ function backgroundF() {
   background.x0 -= background.speed;
   background.x1 -= background.speed * background.parallax;
   background.x2 -= background.speed * background.parallax * background.parallax;
-  if(background.x0 <= -1600) {
+  if (background.x0 <= -1600) {
     background.x0 = 0;
   }
   CTX.drawImage(SPRITES.background3, background.x3, 0);
   CTX.drawImage(SPRITES.background0, background.x0, 0);
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
-  
-  
+
+
 }
 
 // main update function to handle player movement, jumping, and landing logic
@@ -169,7 +169,7 @@ function drawMainMenu() {
 }
 
 // draws the player's current sprite based on the state
-function draw() {
+function drawSprite() {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
   backgroundF();
   let currentSprite = SPRITES.stand;
@@ -179,12 +179,6 @@ function draw() {
   else if (player.state === "land") currentSprite = SPRITES.land;
 
   CTX.drawImage(currentSprite, player.x, player.y, player.size, player.size);
-}
-// main game loop to update and draw the game state
-function gameLoop() {
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
 }
 // main loop to handle screen rendering and game updates
 function mainLoop() {
@@ -198,9 +192,9 @@ function mainLoop() {
       break;
     case "playing":
     case "playing":
-      
+
       update();
-      draw();
+      drawSprite();
       break;
   }
 
