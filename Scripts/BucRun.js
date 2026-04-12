@@ -10,7 +10,10 @@ const SPRITES = {
   jump: new Image(),
   land: new Image(),
   background0: new Image(),
+  background1: new Image(),
+  background2: new Image(),
   background3: new Image(),
+  background4: new Image()
 };
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = "Assets/BuckyJumping.png";
@@ -18,7 +21,10 @@ SPRITES.land.src = "Assets/BuckyLanding.png";
 SPRITES.prejump.src = "Assets/BuckyPreJump.png";
 SPRITES.stand.src = "Assets/BuckyRunning.png";
 SPRITES.background0.src = "Assets/roadsidewalktrees.png";
-SPRITES.background3.src = "Assets/sunsky.png";
+SPRITES.background1.src = "Assets/clouds1.png";
+SPRITES.background2.src = "Assets/clouds2.png";
+SPRITES.background3.src = "Assets/clouds3.png";
+SPRITES.background4.src = "Assets/sunsky.png";
 
 
 const GROUND_Y = 350;
@@ -40,9 +46,10 @@ let player = {
 //background object with properties for position, speed, and parallax
 let background = {
   x0: 0, //road and trees
-  x1: 0,
-  x2: 0,
-  x3: 0, //sun and sky
+  x1: 0, //clouds
+  x2: 0, //clouds
+  x3: 0, //clouds
+  x4: 0, //sun and sky
   speed: 4,
   parallax: 0.8
 }
@@ -83,13 +90,33 @@ CANVAS.addEventListener("click", () => {
 function backgroundF() {
   background.x0 -= background.speed;
   background.x1 -= background.speed * background.parallax;
-  background.x2 -= background.speed * background.parallax * background.parallax;
+  background.x2 -= background.speed * Math.pow(background.parallax, 2);
+  background.x3 -= background.speed * Math.pow(background.parallax, 3);
+  background.x4 -= background.speed * Math.pow(background.parallax, 4);
   if(background.x0 <= -1600) {
     background.x0 = 0;
   }
+  if(background.x1 <= -1600) {
+    background.x1 = 0;
+  }
+  if(background.x2 <= -1600) {
+    background.x2 = 0;
+  }
+  if(background.x3 <= -1600) {
+    background.x3 = 0;
+  }
+  CTX.drawImage(SPRITES.background4, background.x4, 0);
   CTX.drawImage(SPRITES.background3, background.x3, 0);
+  CTX.drawImage(SPRITES.background3, background.x3 + 1600, 0);
+  CTX.drawImage(SPRITES.background2, background.x2, 0);
+  CTX.drawImage(SPRITES.background2, background.x2 + 1600, 0);
+  CTX.drawImage(SPRITES.background1, background.x1, 0);
+  CTX.drawImage(SPRITES.background1, background.x1 + 1600, 0);
   CTX.drawImage(SPRITES.background0, background.x0, 0);
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
+  
+  
+  
   
   
 }
