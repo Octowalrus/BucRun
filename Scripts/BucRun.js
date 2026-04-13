@@ -13,7 +13,7 @@ const SPRITES = {
   background1: new Image(),
   background2: new Image(),
   background3: new Image(),
-  background4: new Image()
+  background4: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = "Assets/BuckyJumping.png";
@@ -25,7 +25,6 @@ SPRITES.background1.src = "Assets/clouds1.png";
 SPRITES.background2.src = "Assets/clouds2.png";
 SPRITES.background3.src = "Assets/clouds3.png";
 SPRITES.background4.src = "Assets/sunsky.png";
-
 
 const GROUND_Y = 350;
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
@@ -51,8 +50,8 @@ let background = {
   x3: 0, //clouds
   x4: 0, //sun and sky
   speed: 4,
-  parallax: 0.8
-}
+  parallax: 0.8,
+};
 
 let jumpQueued = false;
 let jumpKeyHeld = false;
@@ -97,13 +96,13 @@ function backgroundF() {
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
-  if(background.x1 <= -1600) {
+  if (background.x1 <= -1600) {
     background.x1 = 0;
   }
-  if(background.x2 <= -1600) {
+  if (background.x2 <= -1600) {
     background.x2 = 0;
   }
-  if(background.x3 <= -1600) {
+  if (background.x3 <= -1600) {
     background.x3 = 0;
   }
   CTX.drawImage(SPRITES.background4, background.x4, 0);
@@ -115,11 +114,6 @@ function backgroundF() {
   CTX.drawImage(SPRITES.background1, background.x1 + 1600, 0);
   CTX.drawImage(SPRITES.background0, background.x0, 0);
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
-  
-  
-  
-  
-  
 }
 
 // main update function to handle player movement, jumping, and landing logic
@@ -220,7 +214,6 @@ function mainLoop() {
       break;
     case "playing":
     case "playing":
-
       update();
       drawSprite();
       break;
