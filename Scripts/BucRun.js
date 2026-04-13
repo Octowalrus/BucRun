@@ -195,7 +195,7 @@ function drawMainMenu() {
 }
 
 // draws the player's current sprite based on the state
-function draw() {
+function drawSprite() {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
   backgroundF();
   let currentSprite = SPRITES.stand;
@@ -205,12 +205,6 @@ function draw() {
   else if (player.state === "land") currentSprite = SPRITES.land;
 
   CTX.drawImage(currentSprite, player.x, player.y, player.size, player.size);
-}
-// main game loop to update and draw the game state
-function gameLoop() {
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
 }
 // main loop to handle screen rendering and game updates
 function mainLoop() {
@@ -224,9 +218,9 @@ function mainLoop() {
       break;
     case "playing":
     case "playing":
-      
+
       update();
-      draw();
+      drawSprite();
       break;
   }
 
