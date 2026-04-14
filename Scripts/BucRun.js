@@ -1,7 +1,13 @@
+
+// Global Variables
+//=======================================================================
+
+
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
 const CANVAS = document.getElementById("gameCanvas");
 const CTX = CANVAS.getContext("2d");
+let currentCoins = 0; //global storing how many coins the player has currently
 
 // load SPRITES assets of each state
 const SPRITES = {
@@ -9,6 +15,7 @@ const SPRITES = {
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
+  coin: new Image(), //coin image
   background0: new Image(),
   background1: new Image(),
   background2: new Image(),
@@ -25,6 +32,15 @@ SPRITES.background1.src = "Assets/clouds1.png";
 SPRITES.background2.src = "Assets/clouds2.png";
 SPRITES.background3.src = "Assets/clouds3.png";
 SPRITES.background4.src = "Assets/sunsky.png";
+SPRITES.coin.src = "Assets/coin.png";
+
+//Array that contains coin's x,y and boolean value that determines if it's been picked up
+let coins = [
+  {x: 40, y:20, width:40, height:45, collected:false}
+
+];
+
+
 
 const GROUND_Y = 350;
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
@@ -55,6 +71,15 @@ let background = {
 
 let jumpQueued = false;
 let jumpKeyHeld = false;
+
+
+
+
+
+//======================================================================================
+//END OF GLOBAL VARIABLES
+
+spawnCoin(player.x+800,player.y);
 
 // key press event listener for jump input
 document.addEventListener("keydown", (e) => {
@@ -167,6 +192,7 @@ function update() {
       player.state = "stand";
     }
   }
+  coinMove();
 }
 // function to draw the main menu screen
 function drawMainMenu() {
@@ -211,9 +237,11 @@ function mainLoop() {
       drawMainMenu();
       break;
     case "playing":
-    case "playing":
       update();
       drawSprite();
+      coinMove();
+      drawCoin();
+      coinPickup();
       break;
   }
 
@@ -232,4 +260,47 @@ for (let key in SPRITES) {
       mainLoop();
     }
   };
+}
+
+//Function that will create a coin at x,y locations with a default value of not collected
+function spawnCoin(x,y){
+  coins.push({
+    x: x,
+    y: y,
+    width: 40,
+    height: 45,
+    collected: false
+  });
+}
+//function to update coins to move with the speed of the side scrolling
+function coinMove() {
+  coins.forEach((coin) => {
+    coin.x -= 4;
+  });
+
+  // remove off-screen coins
+  coins = coins.filter(coin => coin.x + coin.width > 0);
+}
+//function to draw the all coins in the array coins
+function drawCoin() {
+  coins.forEach((coin) => {
+    if (!coin.collected) {
+      CTX.drawImage(SPRITES.coin, coin.x, coin.y, coin.width, coin.height);
+    }
+  });
+}
+//function for coin pickup detection
+function coinPickup(){
+  coins.forEach((coin) => {
+  if (
+    !coin.collected &&
+    player.x < coin.x + coin.width &&
+    player.x + player.size > coin.x &&
+    player.y < coin.y + coin.height &&
+    player.y + player.size > coin.y
+  ) {
+    coin.collected = true;
+    currentCoins++;
+  }
+});
 }
