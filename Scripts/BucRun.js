@@ -6,6 +6,7 @@ const CTX = CANVAS.getContext("2d");
 // load SPRITES assets of each state
 const SPRITES = {
   stand: new Image(),
+  stand1: new Image(),
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
@@ -16,15 +17,16 @@ const SPRITES = {
   background4: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
-SPRITES.jump.src = "Assets/BuckyJumping.png";
-SPRITES.land.src = "Assets/BuckyLanding.png";
-SPRITES.prejump.src = "Assets/BuckyPreJump.png";
-SPRITES.stand.src = "Assets/BuckyRunning.png";
-SPRITES.background0.src = "Assets/roadsidewalktrees.png";
-SPRITES.background1.src = "Assets/clouds1.png";
-SPRITES.background2.src = "Assets/clouds2.png";
-SPRITES.background3.src = "Assets/clouds3.png";
-SPRITES.background4.src = "Assets/sunsky.png";
+SPRITES.jump.src = "Assets/Bucky/run2.png";
+SPRITES.land.src = "Assets/Bucky/run3.png";
+SPRITES.prejump.src = "Assets/Bucky/run1.png";
+SPRITES.stand.src = "Assets/Bucky/stand1.png";
+SPRITES.stand1.src ="Assets/Bucky/stand2.png"
+SPRITES.background0.src = "Assets/Background/roadsidewalktrees.png";
+SPRITES.background1.src = "Assets/Background/clouds1.png";
+SPRITES.background2.src = "Assets/Background/clouds2.png";
+SPRITES.background3.src = "Assets/Background/clouds3.png";
+SPRITES.background4.src = "Assets/Background/sunsky.png";
 
 const GROUND_Y = 350;
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
