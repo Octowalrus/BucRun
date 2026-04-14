@@ -93,9 +93,7 @@ function backgroundF() {
   background.x1 -= background.speed * background.parallax;
   background.x2 -= background.speed * Math.pow(background.parallax, 2);
   background.x3 -= background.speed * Math.pow(background.parallax, 3);
-  background.x4 -= background.speed * Math.pow(background.parallax, 4);
-
-  if (background.x0 <= -1600) {
+  if(background.x0 <= -1600) {
     background.x0 = 0;
   }
   if (background.x1 <= -1600) {
