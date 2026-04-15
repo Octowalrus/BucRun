@@ -2,18 +2,18 @@
 // Global Variables
 //=======================================================================
 const GRID = {
-  cols: 3,
+  cols: 4,
   itemWidth: 150,
   itemHeight: 150,
   padding: 20,
-  startingX: 100,
+  startingX: 70,
   startingY: 100
 }
 
 let shopItems = [
-  { name: "Place Holder 1", cost: 10, owned: false, color: "red" },
-  { name: "Place Holder 2", cost: 20, owned: false, color: "blue" },
-  { name: "Place Holder 3", cost: 30, owned: false, color: "green" },
+  { name: "Place Holder 1", cost: 10, owned: false, src: "Assets/Bucky/standA.png" },
+  { name: "Place Holder 2", cost: 20, owned: false, src: "Assets/Template/standA.png" },
+  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
 ]
 
 // main variable to track the current screen (menu or playing)
@@ -51,7 +51,7 @@ SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  {x:500, y:300, width:40, height:45, collected:false},
+  { x: 500, y: 300, width: 40, height: 45, collected: false },
 ];
 
 
@@ -171,7 +171,30 @@ CANVAS.addEventListener("click", (e) => {
       mouseY <= 60
     ) {
       currentScreen = "menu";
+      return;
     }
+
+    // Create click area for each item in shop
+    shopItems.forEach((item, index) => {
+      const col = index % GRID.cols;
+      const row = Math.floor(index / GRID.cols);
+
+      const x = GRID.startingX + col * (GRID.itemWidth + GRID.padding);
+      const y = GRID.startingY + row * (GRID.itemHeight + GRID.padding);
+
+      if (
+        mouseX >= x &&
+        mouseX <= x + GRID.itemWidth &&
+        mouseY >= y &&
+        mouseY <= y + GRID.itemHeight
+      ) {
+        // If item is not owned, make it owned
+        // TO DO: Add connection to a coin count
+        if (!item.owned) {
+          item.owned = true;
+        }
+      }
+    });
   }
 });
 // function to handle background moving and rendering
@@ -258,7 +281,7 @@ function update(dt) {
     player.prejumpTimer -= dt * 60;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed;
+      player.velocityY = -player.speed * dt * 60;
       player.state = "jump";
       player.onGround = false;
       jumpQueued = false;
@@ -269,16 +292,16 @@ function update(dt) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity; // slow down gravity while holding
+      player.velocityY += player.gravity * dt * 60; // slow down gravity while holding
     } else {
-      player.velocityY += player.gravity * 3; // normal gravity
+      player.velocityY += player.gravity * 3 * dt * 60; // normal gravity
     }
     // update y position based on velocity
-    player.y += player.velocityY;
+    player.y += player.velocityY * dt * 60;
   }
   // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
   if (player.y <= GROUND_Y - MAX_JUMP_HEIGHT) {
-    player.velocityY += player.gravity * 6; // slowly start falling down if above max jump height
+    player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
 
@@ -368,8 +391,10 @@ function drawShop() {
     CTX.fillStyle = "#222";
     CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
 
-    CTX.fillStyle = item.color;
-    CTX.fillRect(x + 20, y + 20, 50, 50);
+    // Draw image of cosmetic
+    const img = new Image();
+    img.src = item.src;
+    CTX.drawImage(img, x + 20, y + 20, player.size, player.size);
 
     CTX.fillStyle = "white";
     CTX.font = "16px Arial";
