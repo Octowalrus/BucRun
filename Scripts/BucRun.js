@@ -1,4 +1,3 @@
-
 // Global Variables
 //=======================================================================
 const GRID = {
@@ -7,14 +6,24 @@ const GRID = {
   itemHeight: 150,
   padding: 20,
   startingX: 70,
-  startingY: 100
-}
+  startingY: 100,
+};
 
 let shopItems = [
-  { name: "Place Holder 1", cost: 10, owned: false, src: "Assets/Bucky/standA.png" },
-  { name: "Place Holder 2", cost: 20, owned: false, src: "Assets/Template/standA.png" },
+  {
+    name: "Place Holder 1",
+    cost: 10,
+    owned: false,
+    src: "Assets/Bucky/standA.png",
+  },
+  {
+    name: "Place Holder 2",
+    cost: 20,
+    owned: false,
+    src: "Assets/Template/standA.png",
+  },
   { name: "Place Holder 3", cost: 30, owned: false, src: "" },
-]
+];
 
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
@@ -52,13 +61,9 @@ SPRITES.coin.src = "Assets/coin.png";
 SPRITES.firehydrant.src = "Assets/firehydrant.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
-let coins = [
-  { x: 500, y: 300, width: 40, height: 45, collected: false },
-];
+let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
 
-
-
-const GROUND_Y = 320;   // KEEP GROUND_Y same as player.y
+const GROUND_Y = 320; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
@@ -90,9 +95,6 @@ let jumpKeyHeld = false;
 let standingFrame = 0;
 let standingFrameCounter = 0;
 let lastTime = 0;
-
-
-
 
 //======================================================================================
 //END OF GLOBAL VARIABLES
@@ -166,12 +168,7 @@ CANVAS.addEventListener("click", (e) => {
     }
   } else if (currentScreen === "shop") {
     // back button in shop
-    if (
-      mouseX >= 20 &&
-      mouseX <= 120 &&
-      mouseY >= 20 &&
-      mouseY <= 60
-    ) {
+    if (mouseX >= 20 && mouseX <= 120 && mouseY >= 20 && mouseY <= 60) {
       currentScreen = "menu";
       return;
     }
@@ -203,8 +200,10 @@ CANVAS.addEventListener("click", (e) => {
 function backgroundF(dt) {
   background.x0 -= background.speed * dt * 60;
   background.x1 -= background.speed * background.parallax * dt * 60;
-  background.x2 -= background.speed * Math.pow(background.parallax, 2) * dt * 60;
-  background.x3 -= background.speed * Math.pow(background.parallax, 3) * dt * 60;
+  background.x2 -=
+    background.speed * Math.pow(background.parallax, 2) * dt * 60;
+  background.x3 -=
+    background.speed * Math.pow(background.parallax, 3) * dt * 60;
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
@@ -421,9 +420,6 @@ function drawShop() {
   CTX.fillText("BACK", 70, 48);
 }
 
-
-
-
 //Function that will create a coin at x,y locations with a default value of not collected
 function spawnCoin(x, y) {
   coins.push({
@@ -431,7 +427,7 @@ function spawnCoin(x, y) {
     y: y,
     width: 40,
     height: 45,
-    collected: false
+    collected: false,
   });
 }
 //function to update coins to move with the speed of the side scrolling
@@ -441,7 +437,7 @@ function coinMove(dt) {
   });
 
   // remove off-screen coins
-  coins = coins.filter(coin => coin.x + coin.width > 0);
+  coins = coins.filter((coin) => coin.x + coin.width > 0);
 }
 //function to draw the all coins in the array coins
 function drawCoin() {
