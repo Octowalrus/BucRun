@@ -87,7 +87,7 @@ let jumpQueued = false;
 let jumpKeyHeld = false;
 let standingFrame = 0;
 let standingFrameCounter = 0;
-
+let lastTime = 0;
 
 
 
@@ -338,7 +338,7 @@ function drawMainMenu() {
 // draws the player's current sprite based on the state
 function drawSprite(dt) {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  backgroundF();
+  backgroundF(dt);
   let currentSprite = standingFrame === 0 ? SPRITES.standA : SPRITES.standB;
 
   if (player.state === "prejump") currentSprite = SPRITES.prejump;
