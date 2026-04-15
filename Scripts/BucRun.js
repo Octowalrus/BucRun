@@ -51,8 +51,7 @@ SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  { x: 40, y: 20, width: 40, height: 45, collected: false }
-
+  {x:500, y:300, width:40, height:45, collected:false},
 ];
 
 
@@ -88,7 +87,7 @@ let jumpQueued = false;
 let jumpKeyHeld = false;
 let standingFrame = 0;
 let standingFrameCounter = 0;
-
+let lastTime = 0;
 
 
 
@@ -97,6 +96,19 @@ let standingFrameCounter = 0;
 //END OF GLOBAL VARIABLES
 
 spawnCoin(player.x + 800, player.y);
+
+// wait until all images are loaded
+let loadedCount = 0;
+const totalImages = Object.keys(SPRITES).length;
+
+for (let key in SPRITES) {
+  SPRITES[key].onload = () => {
+    loadedCount++;
+    if (loadedCount === totalImages) {
+      mainLoop();
+    }
+  };
+}
 
 // key press event listener for jump input
 document.addEventListener("keydown", (e) => {
@@ -183,11 +195,11 @@ CANVAS.addEventListener("click", (e) => {
   }
 });
 // function to handle background moving and rendering
-function backgroundF() {
-  background.x0 -= background.speed;
-  background.x1 -= background.speed * background.parallax;
-  background.x2 -= background.speed * Math.pow(background.parallax, 2);
-  background.x3 -= background.speed * Math.pow(background.parallax, 3);
+function backgroundF(dt) {
+  background.x0 -= background.speed * dt * 60;
+  background.x1 -= background.speed * background.parallax * dt * 60;
+  background.x2 -= background.speed * Math.pow(background.parallax, 2) * dt * 60;
+  background.x3 -= background.speed * Math.pow(background.parallax, 3) * dt * 60;
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
@@ -211,11 +223,46 @@ function backgroundF() {
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
 }
 
+// main loop to handle screen rendering and game updates
+function mainLoop(timestamp) {
+  // calculate delta time in seconds
+  let dt = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+
+  // clamp dt (prevents huge jumps if tab was inactive)
+  if (dt > 0.1) dt = 0.1;
+
+  // clear CANVAS
+  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+  // switch statement to change between the screens
+  switch (currentScreen) {
+    case "menu":
+      drawMainMenu();
+      break;
+    case "playing":
+      update(dt);
+      drawSprite(dt);
+      coinMove(dt);
+      drawCoin();
+      coinPickup();
+      spawnCoin(player.x + 800, player.y);
+
+      break;
+    case "shop":
+      drawShop();
+      break;
+  }
+
+  // call the function again
+  requestAnimationFrame(mainLoop);
+}
+
 // main update function to handle player movement, jumping, and landing logic
-function update() {
+function update(dt) {
   // alternate standing frame every 20 frames
   if (player.state === "stand") {
-    standingFrameCounter++;
+    standingFrameCounter += dt * 60;
 
     if (standingFrameCounter >= 20) {
       standingFrame = standingFrame === 0 ? 1 : 0;
@@ -228,7 +275,7 @@ function update() {
 
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
-    player.prejumpTimer--;
+    player.prejumpTimer -= dt * 60;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
       player.velocityY = -player.speed;
@@ -271,7 +318,7 @@ function update() {
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
-    player.landingTimer--;
+    player.landingTimer -= dt * 60;
 
     if (player.landingTimer <= 0) {
       player.state = "stand";
@@ -309,9 +356,9 @@ function drawMainMenu() {
 }
 
 // draws the player's current sprite based on the state
-function drawSprite() {
+function drawSprite(dt) {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  backgroundF();
+  backgroundF(dt);
   let currentSprite = standingFrame === 0 ? SPRITES.standA : SPRITES.standB;
 
   if (player.state === "prejump") currentSprite = SPRITES.prejump;
@@ -370,44 +417,8 @@ function drawShop() {
   CTX.fillText("BACK", 70, 48);
 }
 
-// main loop to handle screen rendering and game updates
-function mainLoop() {
-  // clear CANVAS
-  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 
-  // switch statement to change between the screens
-  switch (currentScreen) {
-    case "menu":
-      drawMainMenu();
-      break;
-    case "playing":
-      update();
-      drawSprite();
-      coinMove();
-      drawCoin();
-      coinPickup();
-      break;
-    case "shop":
-      drawShop();
-      break;
-  }
 
-  // call the function again
-  requestAnimationFrame(mainLoop);
-}
-
-// wait until all images are loaded
-let loadedCount = 0;
-const totalImages = Object.keys(SPRITES).length;
-
-for (let key in SPRITES) {
-  SPRITES[key].onload = () => {
-    loadedCount++;
-    if (loadedCount === totalImages) {
-      mainLoop();
-    }
-  };
-}
 
 //Function that will create a coin at x,y locations with a default value of not collected
 function spawnCoin(x, y) {
@@ -420,9 +431,9 @@ function spawnCoin(x, y) {
   });
 }
 //function to update coins to move with the speed of the side scrolling
-function coinMove() {
+function coinMove(dt) {
   coins.forEach((coin) => {
-    coin.x -= 4;
+    coin.x -= 4; // move coin to the left based on the background speed and delta time
   });
 
   // remove off-screen coins
