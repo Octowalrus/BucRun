@@ -1,7 +1,20 @@
 
 // Global Variables
 //=======================================================================
+const GRID = {
+  cols: 3,
+  itemWidth: 150,
+  itemHeight: 150,
+  padding: 20,
+  startingX: 100,
+  startingY: 100
+}
 
+let shopItems = [
+  { name: "Place Holder 1", cost: 10, owned: false, color: "red" },
+  { name: "Place Holder 2", cost: 20, owned: false, color: "blue" },
+  { name: "Place Holder 3", cost: 30, owned: false, color: "green" },
+]
 
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
@@ -38,7 +51,7 @@ SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  {x: 40, y:20, width:40, height:45, collected:false}
+  { x: 40, y: 20, width: 40, height: 45, collected: false }
 
 ];
 
@@ -83,7 +96,7 @@ let standingFrameCounter = 0;
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
-spawnCoin(player.x+800,player.y);
+spawnCoin(player.x + 800, player.y);
 
 // key press event listener for jump input
 document.addEventListener("keydown", (e) => {
@@ -109,9 +122,34 @@ document.addEventListener("keyup", (e) => {
 });
 
 // listens for clicks on the CANVAS for navigating the menu
-CANVAS.addEventListener("click", () => {
+CANVAS.addEventListener("click", (e) => {
+  // get mouse position relative to the canvas
+  const rect = CANVAS.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+
+  // if the screen is the menu, do outcome of click event
   if (currentScreen === "menu") {
-    currentScreen = "playing"; // Transition from menu to game
+    // check if click is on start or shop button
+    // menu button
+    if (
+      mouseX >= CANVAS.width / 2 - 100 &&
+      mouseX <= CANVAS.width / 2 + 100 &&
+      mouseY >= 200 &&
+      mouseY <= 260
+    ) {
+      currentScreen = "playing";
+    }
+
+    // shop button
+    if (
+      mouseX >= CANVAS.width / 2 - 100 &&
+      mouseX <= CANVAS.width / 2 + 100 &&
+      mouseY >= 300 &&
+      mouseY <= 360
+    ) {
+      currentScreen = "shop";
+    }
   }
 });
 // function to handle background moving and rendering
@@ -120,7 +158,7 @@ function backgroundF() {
   background.x1 -= background.speed * background.parallax;
   background.x2 -= background.speed * Math.pow(background.parallax, 2);
   background.x3 -= background.speed * Math.pow(background.parallax, 3);
-  if(background.x0 <= -1600) {
+  if (background.x0 <= -1600) {
     background.x0 = 0;
   }
   if (background.x1 <= -1600) {
@@ -229,6 +267,15 @@ function drawMainMenu() {
   CTX.fillStyle = "black";
   CTX.font = "30px Arial";
   CTX.fillText("START", CANVAS.width / 2, 240);
+
+  // draw shop button
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(CANVAS.width / 2 - 100, 300, 200, 60);
+
+  // text in shop button
+  CTX.fillStyle = "black";
+  CTX.font = "30px Arial";
+  CTX.fillText("SHOP", CANVAS.width / 2, 340);
 }
 
 // draws the player's current sprite based on the state
@@ -243,6 +290,54 @@ function drawSprite() {
 
   CTX.drawImage(currentSprite, player.x, player.y, player.size, player.size);
 }
+
+// function to draw shop GUI
+// shop currently only contains cosmetic changes but upgrades can be added later
+function drawShop() {
+  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+  CTX.fillStyle = "white";
+  CTX.font = "40px Arial";
+  CTX.textAlign = "center";
+  CTX.fillText("SHOP", CANVAS.width / 2, 50);
+
+  // Make a shop item for every item in the shopItems list
+  shopItems.forEach((item, index) => {
+    const col = index % GRID.cols;
+    const row = Math.floor(index / GRID.cols);
+
+    const x = GRID.startingX + col * (GRID.itemWidth + GRID.padding);
+    const y = GRID.startingY + row * (GRID.itemHeight + GRID.padding);
+
+    CTX.fillStyle = "#222";
+    CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
+
+    CTX.fillStyle = item.color;
+    CTX.fillRect(x + 20, y + 20, 50, 50);
+
+    CTX.fillStyle = "white";
+    CTX.font = "16px Arial";
+    CTX.fillText(item.name, x + GRID.itemWidth / 2, y + 100);
+
+    // If item is owned, make text green. Else, make it yellow.
+    if (item.owned) {
+      CTX.fillStyle = "green";
+      CTX.fillText("OWNED", x + GRID.itemWidth / 2, y + 130);
+    } else {
+      CTX.fillStyle = "yellow";
+      CTX.fillText(item.cost + " coins", x + GRID.itemWidth / 2, y + 130);
+    }
+  });
+
+  // back button
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(20, 20, 100, 40);
+
+  CTX.fillStyle = "black";
+  CTX.font = "20px Arial";
+  CTX.fillText("BACK", 70, 48);
+}
+
 // main loop to handle screen rendering and game updates
 function mainLoop() {
   // clear CANVAS
@@ -259,6 +354,9 @@ function mainLoop() {
       coinMove();
       drawCoin();
       coinPickup();
+      break;
+    case "shop":
+      drawShop();
       break;
   }
 
@@ -280,7 +378,7 @@ for (let key in SPRITES) {
 }
 
 //Function that will create a coin at x,y locations with a default value of not collected
-function spawnCoin(x,y){
+function spawnCoin(x, y) {
   coins.push({
     x: x,
     y: y,
@@ -307,17 +405,17 @@ function drawCoin() {
   });
 }
 //function for coin pickup detection
-function coinPickup(){
+function coinPickup() {
   coins.forEach((coin) => {
-  if (
-    !coin.collected &&
-    player.x < coin.x + coin.width &&
-    player.x + player.size > coin.x &&
-    player.y < coin.y + coin.height &&
-    player.y + player.size > coin.y
-  ) {
-    coin.collected = true;
-    currentCoins++;
-  }
-});
+    if (
+      !coin.collected &&
+      player.x < coin.x + coin.width &&
+      player.x + player.size > coin.x &&
+      player.y < coin.y + coin.height &&
+      player.y + player.size > coin.y
+    ) {
+      coin.collected = true;
+      currentCoins++;
+    }
+  });
 }
