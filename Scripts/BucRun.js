@@ -2,11 +2,11 @@
 // Global Variables
 //=======================================================================
 const GRID = {
-  cols: 3,
+  cols: 4,
   itemWidth: 150,
   itemHeight: 150,
   padding: 20,
-  startingX: 100,
+  startingX: 70,
   startingY: 100
 }
 
