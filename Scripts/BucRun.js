@@ -24,7 +24,8 @@ let currentCoins = 0; //global storing how many coins the player has currently
 
 // load SPRITES assets of each state
 const SPRITES = {
-  stand: new Image(),
+  standA: new Image(),
+  standB: new Image(),
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
@@ -36,31 +37,32 @@ const SPRITES = {
   background4: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
-SPRITES.jump.src = "Assets/BuckyJumping.png";
-SPRITES.land.src = "Assets/BuckyLanding.png";
-SPRITES.prejump.src = "Assets/BuckyPreJump.png";
-SPRITES.stand.src = "Assets/BuckyRunning.png";
-SPRITES.background0.src = "Assets/roadsidewalktrees.png";
-SPRITES.background1.src = "Assets/clouds1.png";
-SPRITES.background2.src = "Assets/clouds2.png";
-SPRITES.background3.src = "Assets/clouds3.png";
-SPRITES.background4.src = "Assets/sunsky.png";
+SPRITES.jump.src = "Assets/Bucky/jump.png";
+SPRITES.land.src = "Assets/Bucky/run2.png";
+SPRITES.prejump.src = "Assets/Bucky/run1.png";
+SPRITES.standA.src = "Assets/Bucky/standA.png";
+SPRITES.standB.src = "Assets/Bucky/standB.png";
+SPRITES.background0.src = "Assets/Background/roadsidewalktrees.png";
+SPRITES.background1.src = "Assets/Background/clouds1.png";
+SPRITES.background2.src = "Assets/Background/clouds2.png";
+SPRITES.background3.src = "Assets/Background/clouds3.png";
+SPRITES.background4.src = "Assets/Background/sunsky.png";
 SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
   {x:500, y:300, width:40, height:45, collected:false},
 ];
-let lastTime = 0; // variable to track the last time a frame was generated
 
 
-const GROUND_Y = 350;
+
+const GROUND_Y = 320;   // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
   x: 20,
-  y: 350,
-  size: 50,
+  y: 320,
+  size: 80,
   speed: 10,
   velocityY: 0,
   gravity: 0.3,
@@ -83,6 +85,8 @@ let background = {
 
 let jumpQueued = false;
 let jumpKeyHeld = false;
+let standingFrame = 0;
+let standingFrameCounter = 0;
 
 
 
@@ -158,6 +162,16 @@ CANVAS.addEventListener("click", (e) => {
     ) {
       currentScreen = "shop";
     }
+  } else if (currentScreen === "shop") {
+    // back button in shop
+    if (
+      mouseX >= 20 &&
+      mouseX <= 120 &&
+      mouseY >= 20 &&
+      mouseY <= 60
+    ) {
+      currentScreen = "menu";
+    }
   }
 });
 // function to handle background moving and rendering
@@ -225,7 +239,20 @@ function mainLoop(timestamp) {
 }
 
 // main update function to handle player movement, jumping, and landing logic
-function update(dt) {
+function update() {
+  // alternate standing frame every 20 frames
+  if (player.state === "stand") {
+    standingFrameCounter++;
+
+    if (standingFrameCounter >= 20) {
+      standingFrame = standingFrame === 0 ? 1 : 0;
+      standingFrameCounter = 0;
+    }
+  } else {
+    standingFrame = 0;
+    standingFrameCounter = 0;
+  }
+
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
     player.prejumpTimer -= dt * 60;
@@ -311,8 +338,8 @@ function drawMainMenu() {
 // draws the player's current sprite based on the state
 function drawSprite(dt) {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  backgroundF(dt);
-  let currentSprite = SPRITES.stand;
+  backgroundF();
+  let currentSprite = standingFrame === 0 ? SPRITES.standA : SPRITES.standB;
 
   if (player.state === "prejump") currentSprite = SPRITES.prejump;
   else if (player.state === "jump") currentSprite = SPRITES.jump;
