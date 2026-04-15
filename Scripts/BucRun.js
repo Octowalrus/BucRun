@@ -79,7 +79,7 @@ let background = {
   x2: 0, //clouds
   x3: 0, //clouds
   x4: 0, //sun and sky
-  speed: 4,
+  speed: 6,
   parallax: 0.8,
 };
 
@@ -281,7 +281,7 @@ function update(dt) {
     player.prejumpTimer -= dt * 60;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed;
+      player.velocityY = -player.speed * dt * 60;
       player.state = "jump";
       player.onGround = false;
       jumpQueued = false;
@@ -292,16 +292,16 @@ function update(dt) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity; // slow down gravity while holding
+      player.velocityY += player.gravity * dt * 60; // slow down gravity while holding
     } else {
-      player.velocityY += player.gravity * 3; // normal gravity
+      player.velocityY += player.gravity * 3 * dt * 60; // normal gravity
     }
     // update y position based on velocity
-    player.y += player.velocityY;
+    player.y += player.velocityY * dt * 60;
   }
   // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
   if (player.y <= GROUND_Y - MAX_JUMP_HEIGHT) {
-    player.velocityY += player.gravity * 6; // slowly start falling down if above max jump height
+    player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
 
@@ -327,7 +327,6 @@ function update(dt) {
       player.state = "stand";
     }
   }
-  coinMove();
 }
 // function to draw the main menu screen
 function drawMainMenu() {
@@ -436,7 +435,7 @@ function spawnCoin(x, y) {
 //function to update coins to move with the speed of the side scrolling
 function coinMove(dt) {
   coins.forEach((coin) => {
-    coin.x -= 4; // move coin to the left based on the background speed and delta time
+    coin.x -= background.speed * dt * 60; // move coin to the left based on the background speed and delta time
   });
 
   // remove off-screen coins
