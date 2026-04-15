@@ -120,7 +120,7 @@ document.addEventListener("keydown", (e) => {
 
   if ((KEY === "w" || KEY === " " || KEY === "arrowup") && player.onGround) {
     player.state = "prejump";
-    player.prejumpTimer = 6; // how many frames to show prejump
+    player.prejumpTimer = .1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
   }
@@ -267,9 +267,9 @@ function mainLoop(timestamp) {
 function update(dt) {
   // alternate standing frame every 20 frames
   if (player.state === "stand") {
-    standingFrameCounter += dt * 60;
+    standingFrameCounter += dt;
 
-    if (standingFrameCounter >= 20) {
+    if (standingFrameCounter >= .3) {
       standingFrame = standingFrame === 0 ? 1 : 0;
       standingFrameCounter = 0;
     }
@@ -280,10 +280,10 @@ function update(dt) {
 
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
-    player.prejumpTimer -= dt * 60;
+    player.prejumpTimer -= dt;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed * dt * 60;
+      player.velocityY = -player.speed;
       player.state = "jump";
       player.onGround = false;
       jumpQueued = false;
@@ -316,14 +316,14 @@ function update(dt) {
 
     if (wasInAir && player.state !== "land" && player.state !== "prejump") {
       player.state = "land";
-      player.landingTimer = 6;
+      player.landingTimer = .1;
     }
 
     player.onGround = true;
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
-    player.landingTimer -= dt * 60;
+    player.landingTimer -= dt;
 
     if (player.landingTimer <= 0) {
       player.state = "stand";
