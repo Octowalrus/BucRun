@@ -150,6 +150,16 @@ CANVAS.addEventListener("click", (e) => {
     ) {
       currentScreen = "shop";
     }
+  } else if (currentScreen === "shop") {
+    // back button in shop
+    if (
+      mouseX >= 20 &&
+      mouseX <= 120 &&
+      mouseY >= 20 &&
+      mouseY <= 60
+    ) {
+      currentScreen = "menu";
+    }
   }
 });
 // function to handle background moving and rendering
