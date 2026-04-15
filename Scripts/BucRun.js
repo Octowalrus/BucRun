@@ -51,7 +51,7 @@ SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  {x:500, y:300, width:40, height:45, collected:false},
+  { x: 500, y: 300, width: 40, height: 45, collected: false },
 ];
 
 
@@ -174,6 +174,7 @@ CANVAS.addEventListener("click", (e) => {
       return;
     }
 
+    // Create click area for each item in shop
     shopItems.forEach((item, index) => {
       const col = index % GRID.cols;
       const row = Math.floor(index / GRID.cols);
@@ -187,6 +188,8 @@ CANVAS.addEventListener("click", (e) => {
         mouseY >= y &&
         mouseY <= y + GRID.itemHeight
       ) {
+        // If item is not owned, make it owned
+        // TO DO: Add connection to a coin count
         if (!item.owned) {
           item.owned = true;
         }
