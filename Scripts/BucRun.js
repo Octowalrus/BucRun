@@ -24,7 +24,8 @@ let currentCoins = 0; //global storing how many coins the player has currently
 
 // load SPRITES assets of each state
 const SPRITES = {
-  stand: new Image(),
+  standA: new Image(),
+  standB: new Image(),
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
@@ -36,32 +37,32 @@ const SPRITES = {
   background4: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
-SPRITES.jump.src = "Assets/BuckyJumping.png";
-SPRITES.land.src = "Assets/BuckyLanding.png";
-SPRITES.prejump.src = "Assets/BuckyPreJump.png";
-SPRITES.stand.src = "Assets/BuckyRunning.png";
-SPRITES.background0.src = "Assets/roadsidewalktrees.png";
-SPRITES.background1.src = "Assets/clouds1.png";
-SPRITES.background2.src = "Assets/clouds2.png";
-SPRITES.background3.src = "Assets/clouds3.png";
-SPRITES.background4.src = "Assets/sunsky.png";
+SPRITES.jump.src = "Assets/Bucky/jump.png";
+SPRITES.land.src = "Assets/Bucky/run2.png";
+SPRITES.prejump.src = "Assets/Bucky/run1.png";
+SPRITES.standA.src = "Assets/Bucky/standA.png";
+SPRITES.standB.src = "Assets/Bucky/standB.png";
+SPRITES.background0.src = "Assets/Background/roadsidewalktrees.png";
+SPRITES.background1.src = "Assets/Background/clouds1.png";
+SPRITES.background2.src = "Assets/Background/clouds2.png";
+SPRITES.background3.src = "Assets/Background/clouds3.png";
+SPRITES.background4.src = "Assets/Background/sunsky.png";
 SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  { x: 40, y: 20, width: 40, height: 45, collected: false }
-
+  {x:500, y:300, width:40, height:45, collected:false},
 ];
 
 
 
-const GROUND_Y = 350;
+const GROUND_Y = 320;   // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
   x: 20,
-  y: 350,
-  size: 50,
+  y: 320,
+  size: 80,
   speed: 10,
   velocityY: 0,
   gravity: 0.3,
@@ -78,13 +79,15 @@ let background = {
   x2: 0, //clouds
   x3: 0, //clouds
   x4: 0, //sun and sky
-  speed: 4,
+  speed: 6,
   parallax: 0.8,
 };
 
 let jumpQueued = false;
 let jumpKeyHeld = false;
-
+let standingFrame = 0;
+let standingFrameCounter = 0;
+let lastTime = 0;
 //array of arrays holding images and functionality of obstacles
 let obstacles = [
   [null, "none"],
@@ -118,6 +121,19 @@ let gameScene = [
 //END OF GLOBAL VARIABLES
 
 spawnCoin(player.x + 800, player.y);
+
+// wait until all images are loaded
+let loadedCount = 0;
+const totalImages = Object.keys(SPRITES).length;
+
+for (let key in SPRITES) {
+  SPRITES[key].onload = () => {
+    loadedCount++;
+    if (loadedCount === totalImages) {
+      mainLoop();
+    }
+  };
+}
 
 // key press event listener for jump input
 document.addEventListener("keydown", (e) => {
@@ -170,14 +186,24 @@ CANVAS.addEventListener("click", (e) => {
     ) {
       currentScreen = "shop";
     }
+  } else if (currentScreen === "shop") {
+    // back button in shop
+    if (
+      mouseX >= 20 &&
+      mouseX <= 120 &&
+      mouseY >= 20 &&
+      mouseY <= 60
+    ) {
+      currentScreen = "menu";
+    }
   }
 });
 // function to handle background moving and rendering
-function backgroundF() {
-  background.x0 -= background.speed;
-  background.x1 -= background.speed * background.parallax;
-  background.x2 -= background.speed * Math.pow(background.parallax, 2);
-  background.x3 -= background.speed * Math.pow(background.parallax, 3);
+function backgroundF(dt) {
+  background.x0 -= background.speed * dt * 60;
+  background.x1 -= background.speed * background.parallax * dt * 60;
+  background.x2 -= background.speed * Math.pow(background.parallax, 2) * dt * 60;
+  background.x3 -= background.speed * Math.pow(background.parallax, 3) * dt * 60;
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
@@ -201,6 +227,76 @@ function backgroundF() {
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
 }
 
+// main loop to handle screen rendering and game updates
+function mainLoop(timestamp) {
+  // calculate delta time in seconds
+  let dt = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+
+  // clamp dt (prevents huge jumps if tab was inactive)
+  if (dt > 0.1) dt = 0.1;
+
+  // clear CANVAS
+  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+  // switch statement to change between the screens
+  switch (currentScreen) {
+    case "menu":
+      drawMainMenu();
+      break;
+    case "playing":
+      update(dt);
+      drawSprite(dt);
+      coinMove(dt);
+      drawCoin();
+      coinPickup();
+      spawnCoin(player.x + 800, player.y);
+
+      break;
+    case "shop":
+      drawShop();
+      break;
+  }
+
+  // call the function again
+  requestAnimationFrame(mainLoop);
+}
+
+// main loop to handle screen rendering and game updates
+function mainLoop(timestamp) {
+  // calculate delta time in seconds
+  let dt = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+
+  // clamp dt (prevents huge jumps if tab was inactive)
+  if (dt > 0.1) dt = 0.1;
+
+  // clear CANVAS
+  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+  // switch statement to change between the screens
+  switch (currentScreen) {
+    case "menu":
+      drawMainMenu();
+      break;
+    case "playing":
+      update(dt);
+      drawSprite(dt);
+      coinMove(dt);
+      drawCoin();
+      coinPickup();
+      spawnCoin(player.x + 800, player.y);
+
+      break;
+    case "shop":
+      drawShop();
+      break;
+  }
+
+  // call the function again
+  requestAnimationFrame(mainLoop);
+}
+
 //function to handle generation of obstacles
 function obstacleGeneration() {
   gridSize = 45; 
@@ -212,10 +308,23 @@ function obstacleGeneration() {
   }
 }
 // main update function to handle player movement, jumping, and landing logic
-function update() {
+function update(dt) {
+  // alternate standing frame every 20 frames
+  if (player.state === "stand") {
+    standingFrameCounter += dt * 60;
+
+    if (standingFrameCounter >= 20) {
+      standingFrame = standingFrame === 0 ? 1 : 0;
+      standingFrameCounter = 0;
+    }
+  } else {
+    standingFrame = 0;
+    standingFrameCounter = 0;
+  }
+
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
-    player.prejumpTimer--;
+    player.prejumpTimer -= dt * 60;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
       player.velocityY = -player.speed;
@@ -258,13 +367,12 @@ function update() {
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
-    player.landingTimer--;
+    player.landingTimer -= dt * 60;
 
     if (player.landingTimer <= 0) {
       player.state = "stand";
     }
   }
-  coinMove();
 }
 // function to draw the main menu screen
 function drawMainMenu() {
@@ -296,10 +404,10 @@ function drawMainMenu() {
 }
 
 // draws the player's current sprite based on the state
-function drawSprite() {
+function drawSprite(dt) {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-  backgroundF();
-  let currentSprite = SPRITES.stand;
+  backgroundF(dt);
+  let currentSprite = standingFrame === 0 ? SPRITES.standA : SPRITES.standB;
 
   if (player.state === "prejump") currentSprite = SPRITES.prejump;
   else if (player.state === "jump") currentSprite = SPRITES.jump;
@@ -355,44 +463,8 @@ function drawShop() {
   CTX.fillText("BACK", 70, 48);
 }
 
-// main loop to handle screen rendering and game updates
-function mainLoop() {
-  // clear CANVAS
-  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 
-  // switch statement to change between the screens
-  switch (currentScreen) {
-    case "menu":
-      drawMainMenu();
-      break;
-    case "playing":
-      update();
-      drawSprite();
-      coinMove();
-      drawCoin();
-      coinPickup();
-      break;
-    case "shop":
-      drawShop();
-      break;
-  }
 
-  // call the function again
-  requestAnimationFrame(mainLoop);
-}
-
-// wait until all images are loaded
-let loadedCount = 0;
-const totalImages = Object.keys(SPRITES).length;
-
-for (let key in SPRITES) {
-  SPRITES[key].onload = () => {
-    loadedCount++;
-    if (loadedCount === totalImages) {
-      mainLoop();
-    }
-  };
-}
 
 //Function that will create a coin at x,y locations with a default value of not collected
 function spawnCoin(x, y) {
@@ -405,9 +477,9 @@ function spawnCoin(x, y) {
   });
 }
 //function to update coins to move with the speed of the side scrolling
-function coinMove() {
+function coinMove(dt) {
   coins.forEach((coin) => {
-    coin.x -= 4;
+    coin.x -= background.speed * dt * 60; // move coin to the left based on the background speed and delta time
   });
 
   // remove off-screen coins
