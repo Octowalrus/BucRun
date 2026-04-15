@@ -11,9 +11,9 @@ const GRID = {
 }
 
 let shopItems = [
-  { name: "Place Holder 1", cost: 10, owned: false, color: "red" },
-  { name: "Place Holder 2", cost: 20, owned: false, color: "blue" },
-  { name: "Place Holder 3", cost: 30, owned: false, color: "green" },
+  { name: "Place Holder 1", cost: 10, owned: false, src: "Assets/Bucky/standA.png" },
+  { name: "Place Holder 2", cost: 20, owned: false, src: "Assets/Template/standA.png" },
+  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
 ]
 
 // main variable to track the current screen (menu or playing)
@@ -159,7 +159,27 @@ CANVAS.addEventListener("click", (e) => {
       mouseY <= 60
     ) {
       currentScreen = "menu";
+      return;
     }
+
+    shopItems.forEach((item, index) => {
+      const col = index % GRID.cols;
+      const row = Math.floor(index / GRID.cols);
+
+      const x = GRID.startingX + col * (GRID.itemWidth + GRID.padding);
+      const y = GRID.startingY + row * (GRID.itemHeight + GRID.padding);
+
+      if (
+        mouseX >= x &&
+        mouseX <= x + GRID.itemWidth &&
+        mouseY >= y &&
+        mouseY <= y + GRID.itemHeight
+      ) {
+        if (!item.owned) {
+          item.owned = true;
+        }
+      }
+    });
   }
 });
 // function to handle background moving and rendering
@@ -322,8 +342,10 @@ function drawShop() {
     CTX.fillStyle = "#222";
     CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
 
-    CTX.fillStyle = item.color;
-    CTX.fillRect(x + 20, y + 20, 50, 50);
+    // Draw image of cosmetic
+    const img = new Image();
+    img.src = item.src;
+    CTX.drawImage(img, x + 20, y + 20, player.size, player.size);
 
     CTX.fillStyle = "white";
     CTX.font = "16px Arial";
