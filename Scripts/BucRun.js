@@ -49,10 +49,8 @@ SPRITES.coin.src = "Assets/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
-  { x: 40, y: 20, width: 40, height: 45, collected: false }
-
 ];
-
+let lastTime = 0; // variable to track the last time a frame was generated
 
 
 const GROUND_Y = 350;
@@ -178,7 +176,7 @@ function backgroundF() {
 }
 
 // main update function to handle player movement, jumping, and landing logic
-function update() {
+function update(dt) {
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
     player.prejumpTimer--;
@@ -323,6 +321,13 @@ function drawShop() {
 
 // main loop to handle screen rendering and game updates
 function mainLoop() {
+  // calculate delta time in seconds
+  let dt = (timestamp - lastTime) / 1000;
+  lastTime = timestamp;
+
+  // clamp dt (prevents huge jumps if tab was inactive)
+  if (dt > 0.1) dt = 0.1;
+
   // clear CANVAS
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 
@@ -332,11 +337,13 @@ function mainLoop() {
       drawMainMenu();
       break;
     case "playing":
-      update();
+      update(dt);
       drawSprite();
       coinMove();
       drawCoin();
       coinPickup();
+      spawnCoin(player.x + 800, player.y);
+
       break;
     case "shop":
       drawShop();
