@@ -79,7 +79,7 @@ let background = {
   x2: 0, //clouds
   x3: 0, //clouds
   x4: 0, //sun and sky
-  speed: 4,
+  speed: 6,
   parallax: 0.8,
 };
 
@@ -304,7 +304,6 @@ function update(dt) {
       player.state = "stand";
     }
   }
-  coinMove();
 }
 // function to draw the main menu screen
 function drawMainMenu() {
@@ -411,7 +410,7 @@ function spawnCoin(x, y) {
 //function to update coins to move with the speed of the side scrolling
 function coinMove(dt) {
   coins.forEach((coin) => {
-    coin.x -= 4; // move coin to the left based on the background speed and delta time
+    coin.x -= background.speed * dt * 60; // move coin to the left based on the background speed and delta time
   });
 
   // remove off-screen coins
