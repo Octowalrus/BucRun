@@ -85,8 +85,33 @@ let background = {
 let jumpQueued = false;
 let jumpKeyHeld = false;
 
+//array of arrays holding images and functionality of obstacles
+let obstacles = [
+  [null, "none"],
+  [SPRITES.coin, "block"]
+]
+//array of arrays holding all of the groups of obstacles that will appear
+let scenes = [
+  [
+    "0000000000000000",
+    "0001000100010001",
+    "1010101010101010",
+    "0100010001000100"
+  ],
+  [
+    "0001000100010001",
+    "1010101010101010",
+    "0100010001000100",
+    "0000000000000000"
+  ]
+]
 
-
+let gameScene = [
+  "",
+  "",
+  "",
+  ""
+]
 
 
 //======================================================================================
@@ -116,7 +141,6 @@ document.addEventListener("keyup", (e) => {
     jumpKeyHeld = false; // stop tracking the jump key being held
   }
 });
-
 // listens for clicks on the CANVAS for navigating the menu
 CANVAS.addEventListener("click", (e) => {
   // get mouse position relative to the canvas
@@ -177,6 +201,16 @@ function backgroundF() {
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
 }
 
+//function to handle generation of obstacles
+function obstacleGeneration() {
+  gridSize = 45; 
+
+  for(y = 0; y < scenes[0].length; y++) {
+    for(x = 0; x < scenes[0][0].length; x) {
+      
+    }
+  }
+}
 // main update function to handle player movement, jumping, and landing logic
 function update() {
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
