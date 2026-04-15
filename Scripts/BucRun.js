@@ -239,10 +239,10 @@ function mainLoop(timestamp) {
 }
 
 // main update function to handle player movement, jumping, and landing logic
-function update() {
+function update(dt) {
   // alternate standing frame every 20 frames
   if (player.state === "stand") {
-    standingFrameCounter++;
+    standingFrameCounter += dt * 60;
 
     if (standingFrameCounter >= 20) {
       standingFrame = standingFrame === 0 ? 1 : 0;
