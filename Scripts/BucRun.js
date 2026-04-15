@@ -47,7 +47,7 @@ SPRITES.background1.src = "Assets/Background/clouds1.png";
 SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
-SPRITES.coin.src = "Assets/coin.png";
+SPRITES.coin.src = "Assets/Coin/coin.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [
