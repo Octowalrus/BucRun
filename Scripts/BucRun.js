@@ -10,9 +10,47 @@ const GRID = {
   startingY: 100
 }
 
+const CHARACTER_SPRITES = {
+  Bucky: {
+    previewSrc: "Assets/Bucky/standA.png",
+    frames: {
+      standA: "Assets/Bucky/standA.png",
+      standB: "Assets/Bucky/standB.png",
+      prejump: "Assets/Bucky/run1.png",
+      jump: "Assets/Bucky/jump.png",
+      land: "Assets/Bucky/run2.png",
+    },
+  },
+  Template: {
+    previewSrc: "Assets/Template/standA.png",
+    frames: {
+      standA: "Assets/Template/standA.png",
+      standB: "Assets/Template/standB.png",
+      prejump: "Assets/Template/run1.png",
+      jump: "Assets/Template/run2.png",
+      land: "Assets/Template/run3.png",
+    },
+  },
+};
+
+// This changes the selected sprite's animations to make active character.
+const SELECTED_CHARACTER = "Bucky";
+const ACTIVE_CHARACTER =
+  CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
+
 let shopItems = [
-  { name: "Place Holder 1", cost: 10, owned: false, src: "Assets/Bucky/standA.png" },
-  { name: "Place Holder 2", cost: 20, owned: false, src: "Assets/Template/standA.png" },
+  {
+    name: "Place Holder 1",
+    cost: 10,
+    owned: false,
+    src: CHARACTER_SPRITES.Bucky.previewSrc
+  },
+  {
+    name: "Place Holder 2",
+    cost: 20,
+    owned: false,
+    src: CHARACTER_SPRITES.Template.previewSrc
+  },
   { name: "Place Holder 3", cost: 30, owned: false, src: "" },
 ]
 
@@ -38,11 +76,11 @@ const SPRITES = {
   firehydrant: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
-SPRITES.jump.src = "Assets/Bucky/jump.png";
-SPRITES.land.src = "Assets/Bucky/run2.png";
-SPRITES.prejump.src = "Assets/Bucky/run1.png";
-SPRITES.standA.src = "Assets/Bucky/standA.png";
-SPRITES.standB.src = "Assets/Bucky/standB.png";
+SPRITES.jump.src = ACTIVE_CHARACTER.frames.jump;
+SPRITES.land.src = ACTIVE_CHARACTER.frames.land;
+SPRITES.prejump.src = ACTIVE_CHARACTER.frames.prejump;
+SPRITES.standA.src = ACTIVE_CHARACTER.frames.standA;
+SPRITES.standB.src = ACTIVE_CHARACTER.frames.standB;
 SPRITES.background0.src = "Assets/Background/roadsidewalktrees.png";
 SPRITES.background1.src = "Assets/Background/clouds1.png";
 SPRITES.background2.src = "Assets/Background/clouds2.png";
