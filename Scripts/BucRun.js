@@ -1,5 +1,6 @@
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
+let score = 0; // variable to track the player's score
 const CANVAS = document.getElementById("gameCanvas");
 const CTX = CANVAS.getContext("2d");
 
@@ -129,6 +130,8 @@ function update() {
       jumpQueued = false;
     }
   }
+  score += 0.1; // increase score over time, adjust the increment as needed
+  document.getElementById("score").textContent = "Score: " + Math.floor(score); // update score display
   // if the player is in the air, apply gravity to the velocity and update the y position
   if (!player.onGround) {
     // variable jump: reduce gravity if jump key is still held
