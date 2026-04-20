@@ -1,20 +1,29 @@
-
 // Global Variables
 //=======================================================================
 const GRID = {
-  cols: 3,
+  cols: 4,
   itemWidth: 150,
   itemHeight: 150,
   padding: 20,
-  startingX: 100,
-  startingY: 100
-}
+  startingX: 70,
+  startingY: 100,
+};
 
 let shopItems = [
-  { name: "Place Holder 1", cost: 10, owned: false, color: "red" },
-  { name: "Place Holder 2", cost: 20, owned: false, color: "blue" },
-  { name: "Place Holder 3", cost: 30, owned: false, color: "green" },
-]
+  {
+    name: "Place Holder 1",
+    cost: 10,
+    owned: false,
+    src: "Assets/Bucky/standA.png",
+  },
+  {
+    name: "Place Holder 2",
+    cost: 20,
+    owned: false,
+    src: "Assets/Template/standA.png",
+  },
+  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
+];
 
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
@@ -35,6 +44,7 @@ const SPRITES = {
   background2: new Image(),
   background3: new Image(),
   background4: new Image(),
+  firehydrant: new Image(),
 };
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = "Assets/Bucky/jump.png";
@@ -48,15 +58,12 @@ SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
 SPRITES.coin.src = "Assets/coin.png";
+SPRITES.firehydrant.src = "Assets/firehydrant.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
-let coins = [
-  {x:500, y:300, width:40, height:45, collected:false},
-];
+let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
 
-
-
-const GROUND_Y = 320;   // KEEP GROUND_Y same as player.y
+const GROUND_Y = 320; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
@@ -148,7 +155,7 @@ document.addEventListener("keydown", (e) => {
 
   if ((KEY === "w" || KEY === " " || KEY === "arrowup") && player.onGround) {
     player.state = "prejump";
-    player.prejumpTimer = 6; // how many frames to show prejump
+    player.prejumpTimer = .1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
   }
@@ -193,22 +200,42 @@ CANVAS.addEventListener("click", (e) => {
     }
   } else if (currentScreen === "shop") {
     // back button in shop
-    if (
-      mouseX >= 20 &&
-      mouseX <= 120 &&
-      mouseY >= 20 &&
-      mouseY <= 60
-    ) {
+    if (mouseX >= 20 && mouseX <= 120 && mouseY >= 20 && mouseY <= 60) {
       currentScreen = "menu";
+      return;
     }
+
+    // Create click area for each item in shop
+    shopItems.forEach((item, index) => {
+      const col = index % GRID.cols;
+      const row = Math.floor(index / GRID.cols);
+
+      const x = GRID.startingX + col * (GRID.itemWidth + GRID.padding);
+      const y = GRID.startingY + row * (GRID.itemHeight + GRID.padding);
+
+      if (
+        mouseX >= x &&
+        mouseX <= x + GRID.itemWidth &&
+        mouseY >= y &&
+        mouseY <= y + GRID.itemHeight
+      ) {
+        // If item is not owned, make it owned
+        // TO DO: Add connection to a coin count
+        if (!item.owned) {
+          item.owned = true;
+        }
+      }
+    });
   }
 });
 // function to handle background moving and rendering
 function backgroundF(dt) {
   background.x0 -= background.speed * dt * 60;
   background.x1 -= background.speed * background.parallax * dt * 60;
-  background.x2 -= background.speed * Math.pow(background.parallax, 2) * dt * 60;
-  background.x3 -= background.speed * Math.pow(background.parallax, 3) * dt * 60;
+  background.x2 -=
+    background.speed * Math.pow(background.parallax, 2) * dt * 60;
+  background.x3 -=
+    background.speed * Math.pow(background.parallax, 3) * dt * 60;
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
@@ -334,9 +361,9 @@ function obstacleDraw() {
 function update(dt) {
   // alternate standing frame every 20 frames
   if (player.state === "stand") {
-    standingFrameCounter += dt * 60;
+    standingFrameCounter += dt;
 
-    if (standingFrameCounter >= 20) {
+    if (standingFrameCounter >= .3) {
       standingFrame = standingFrame === 0 ? 1 : 0;
       standingFrameCounter = 0;
     }
@@ -347,7 +374,7 @@ function update(dt) {
 
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
-    player.prejumpTimer -= dt * 60;
+    player.prejumpTimer -= dt;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
       player.velocityY = -player.speed;
@@ -361,16 +388,16 @@ function update(dt) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity; // slow down gravity while holding
+      player.velocityY += player.gravity * dt * 60; // slow down gravity while holding
     } else {
-      player.velocityY += player.gravity * 3; // normal gravity
+      player.velocityY += player.gravity * 3 * dt * 60; // normal gravity
     }
     // update y position based on velocity
-    player.y += player.velocityY;
+    player.y += player.velocityY * dt * 60;
   }
   // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
   if (player.y <= GROUND_Y - MAX_JUMP_HEIGHT) {
-    player.velocityY += player.gravity * 6; // slowly start falling down if above max jump height
+    player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
 
@@ -383,14 +410,14 @@ function update(dt) {
 
     if (wasInAir && player.state !== "land" && player.state !== "prejump") {
       player.state = "land";
-      player.landingTimer = 6;
+      player.landingTimer = .1;
     }
 
     player.onGround = true;
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
-    player.landingTimer -= dt * 60;
+    player.landingTimer -= dt;
 
     if (player.landingTimer <= 0) {
       player.state = "stand";
@@ -460,8 +487,10 @@ function drawShop() {
     CTX.fillStyle = "#222";
     CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
 
-    CTX.fillStyle = item.color;
-    CTX.fillRect(x + 20, y + 20, 50, 50);
+    // Draw image of cosmetic
+    const img = new Image();
+    img.src = item.src;
+    CTX.drawImage(img, x + 20, y + 20, player.size, player.size);
 
     CTX.fillStyle = "white";
     CTX.font = "16px Arial";
@@ -486,9 +515,6 @@ function drawShop() {
   CTX.fillText("BACK", 70, 48);
 }
 
-
-
-
 //Function that will create a coin at x,y locations with a default value of not collected
 function spawnCoin(x, y) {
   coins.push({
@@ -496,7 +522,7 @@ function spawnCoin(x, y) {
     y: y,
     width: 40,
     height: 45,
-    collected: false
+    collected: false,
   });
 }
 //function to update coins to move with the speed of the side scrolling
@@ -506,7 +532,7 @@ function coinMove(dt) {
   });
 
   // remove off-screen coins
-  coins = coins.filter(coin => coin.x + coin.width > 0);
+  coins = coins.filter((coin) => coin.x + coin.width > 0);
 }
 //function to draw the all coins in the array coins
 function drawCoin() {
