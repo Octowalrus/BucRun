@@ -1,5 +1,21 @@
 // Global Variables
 //=======================================================================
+
+let gameState = {
+  stats:{
+    coins: 0,
+    highscore: 0
+  },
+  shop: {
+    items: [
+      {
+      }
+    ]
+  },
+  setting: {
+
+  }
+}
 const GRID = {
   cols: 4,
   itemWidth: 150,
@@ -29,7 +45,7 @@ let shopItems = [
 let currentScreen = "menu";
 const CANVAS = document.getElementById("gameCanvas");
 const CTX = CANVAS.getContext("2d");
-let currentCoins = 0; //global storing how many coins the player has currently
+let currentCoins = gameState.stats.coins; //global storing how many coins the player has currently
 
 // load SPRITES assets of each state
 const SPRITES = {
@@ -461,3 +477,20 @@ function coinPickup() {
     }
   });
 }
+
+// function to save the game data (currently only coins) to localStorage as a JSON string
+function saveGame() {
+  try {
+    const data = JSON.stringify(gameState);
+    localStorage.setItem("myGameSave", data);
+    console.log("Game saved!");
+  } catch (e) {
+    console.error("Save failed:", e);
+  }
+}
+// function to load the game data from localStorage and parse it back into an object, or return null if no data is found
+function loadGame() {
+  const data = localStorage.getItem("saveData");
+  return data ? JSON.parse(data) : null;
+}
+
