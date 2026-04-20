@@ -250,7 +250,6 @@ function mainLoop(timestamp) {
       coinMove(dt);
       drawCoin();
       coinPickup();
-      spawnCoin(player.x + 800, player.y);
 
       break;
     case "shop":
