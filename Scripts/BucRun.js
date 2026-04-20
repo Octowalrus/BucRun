@@ -56,6 +56,7 @@ const CHARACTER_SPRITES = {
   },
 };
 
+// Images for sprite upgrades in shop
 const UPGRADE_SPRITES = {
   doubleJump: {
     previewSrc: "Assets/DoubleJump/doublejump.png",
@@ -73,6 +74,7 @@ const SELECTED_CHARACTER = "Template";
 const ACTIVE_CHARACTER =
   CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
 
+// List of items in the shop
 let shopItems = [
   {
     name: "Ninja",
