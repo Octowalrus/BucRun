@@ -1,4 +1,3 @@
-
 // Global Variables
 //=======================================================================
 const GRID = {
@@ -52,7 +51,7 @@ let shopItems = [
     src: CHARACTER_SPRITES.Template.previewSrc
   },
   { name: "Place Holder 3", cost: 30, owned: false, src: "" },
-]
+];
 
 // main variable to track the current screen (menu or playing)
 let currentScreen = "menu";
@@ -90,13 +89,9 @@ SPRITES.coin.src = "Assets/Coin/coin.png";
 SPRITES.firehydrant.src = "Assets/firehydrant.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
-let coins = [
-  { x: 500, y: 300, width: 40, height: 45, collected: false },
-];
+let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
 
-
-
-const GROUND_Y = 320;   // KEEP GROUND_Y same as player.y
+const GROUND_Y = 320; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
@@ -129,9 +124,6 @@ let standingFrame = 0;
 let standingFrameCounter = 0;
 let lastTime = 0;
 
-
-
-
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
@@ -158,7 +150,7 @@ document.addEventListener("keydown", (e) => {
 
   if ((KEY === "w" || KEY === " " || KEY === "arrowup") && player.onGround) {
     player.state = "prejump";
-    player.prejumpTimer = 6; // how many frames to show prejump
+    player.prejumpTimer = .1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
   }
@@ -204,12 +196,7 @@ CANVAS.addEventListener("click", (e) => {
     }
   } else if (currentScreen === "shop") {
     // back button in shop
-    if (
-      mouseX >= 20 &&
-      mouseX <= 120 &&
-      mouseY >= 20 &&
-      mouseY <= 60
-    ) {
+    if (mouseX >= 20 && mouseX <= 120 && mouseY >= 20 && mouseY <= 60) {
       currentScreen = "menu";
       return;
     }
@@ -241,8 +228,10 @@ CANVAS.addEventListener("click", (e) => {
 function backgroundF(dt) {
   background.x0 -= background.speed * dt * 60;
   background.x1 -= background.speed * background.parallax * dt * 60;
-  background.x2 -= background.speed * Math.pow(background.parallax, 2) * dt * 60;
-  background.x3 -= background.speed * Math.pow(background.parallax, 3) * dt * 60;
+  background.x2 -=
+    background.speed * Math.pow(background.parallax, 2) * dt * 60;
+  background.x3 -=
+    background.speed * Math.pow(background.parallax, 3) * dt * 60;
   if (background.x0 <= -1600) {
     background.x0 = 0;
   }
@@ -305,9 +294,9 @@ function mainLoop(timestamp) {
 function update(dt) {
   // alternate standing frame every 20 frames
   if (player.state === "stand") {
-    standingFrameCounter += dt * 60;
+    standingFrameCounter += dt;
 
-    if (standingFrameCounter >= 20) {
+    if (standingFrameCounter >= .3) {
       standingFrame = standingFrame === 0 ? 1 : 0;
       standingFrameCounter = 0;
     }
@@ -318,10 +307,10 @@ function update(dt) {
 
   // handles the prejump state and lowers the timer until it reaches 0, then initiates the jump
   if (player.state === "prejump") {
-    player.prejumpTimer -= dt * 60;
+    player.prejumpTimer -= dt;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed * dt * 60;
+      player.velocityY = -player.speed;
       player.state = "jump";
       player.onGround = false;
       jumpQueued = false;
@@ -354,14 +343,14 @@ function update(dt) {
 
     if (wasInAir && player.state !== "land" && player.state !== "prejump") {
       player.state = "land";
-      player.landingTimer = 6;
+      player.landingTimer = .1;
     }
 
     player.onGround = true;
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
-    player.landingTimer -= dt * 60;
+    player.landingTimer -= dt;
 
     if (player.landingTimer <= 0) {
       player.state = "stand";
@@ -459,9 +448,6 @@ function drawShop() {
   CTX.fillText("BACK", 70, 48);
 }
 
-
-
-
 //Function that will create a coin at x,y locations with a default value of not collected
 function spawnCoin(x, y) {
   coins.push({
@@ -469,7 +455,7 @@ function spawnCoin(x, y) {
     y: y,
     width: 40,
     height: 45,
-    collected: false
+    collected: false,
   });
 }
 //function to update coins to move with the speed of the side scrolling
@@ -479,7 +465,7 @@ function coinMove(dt) {
   });
 
   // remove off-screen coins
-  coins = coins.filter(coin => coin.x + coin.width > 0);
+  coins = coins.filter((coin) => coin.x + coin.width > 0);
 }
 //function to draw the all coins in the array coins
 function drawCoin() {
