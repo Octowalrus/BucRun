@@ -91,13 +91,13 @@ SPRITES.firehydrant.src = "Assets/firehydrant.png";
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
 
-const GROUND_Y = 320; // KEEP GROUND_Y same as player.y
+const GROUND_Y = 330; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
   x: 20,
-  y: 320,
-  size: 80,
+  y: 330,
+  size: 60,
   speed: 10,
   velocityY: 0,
   gravity: 0.3,
