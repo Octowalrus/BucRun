@@ -52,6 +52,18 @@ const CHARACTER_SPRITES = {
   },
 };
 
+UPGRADE_SPRITES = {
+  doubleJump: {
+    src: "Assets/DoubleJump/doublejump.png",
+  },
+  magnet: {
+    previewSrc: "Assets/Magnet/magnet.png",
+  },
+  slow_Down: {
+    previewSrc: "Assets/SlowDown/slowdown.png",
+  },
+}
+
 // This changes the selected sprite's animations to make active character.
 const SELECTED_CHARACTER = "Bucky";
 const ACTIVE_CHARACTER =
@@ -59,18 +71,29 @@ const ACTIVE_CHARACTER =
 
 let shopItems = [
   {
-    name: "Place Holder 1",
+    name: "Ninja",
     cost: 10,
     owned: false,
-    src: CHARACTER_SPRITES.Bucky.previewSrc
+    src: CHARACTER_SPRITES.Ninja.previewSrc
   },
   {
-    name: "Place Holder 2",
+    name: "Hobo",
     cost: 20,
     owned: false,
+    src: CHARACTER_SPRITES.Hobo.previewSrc
+  },
+  { 
+    name: "Blank", 
+    cost: 30, 
+    owned: false, 
     src: CHARACTER_SPRITES.Template.previewSrc
   },
-  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
+  {
+    name: "Double Jump",
+    cost: 50,
+    owned: false,
+    src: UPGRADE_SPRITES.doubleJump.previewSrc
+  },
 ];
 
 // main variable to track the current screen (menu or playing)
@@ -439,10 +462,12 @@ function drawShop() {
     CTX.fillStyle = "#222";
     CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
 
-    // Draw image of cosmetic
+    // Center the preview horizontally within the shop card.
     const img = new Image();
+    const previewSize = player.size;
+    const previewX = x + (GRID.itemWidth - previewSize) / 2;
     img.src = item.src;
-    CTX.drawImage(img, x + 20, y + 20, player.size, player.size);
+    CTX.drawImage(img, previewX, y + 20, previewSize, previewSize);
 
     CTX.fillStyle = "white";
     CTX.font = "16px Arial";
