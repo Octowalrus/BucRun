@@ -199,6 +199,11 @@ CANVAS.addEventListener("click", (e) => {
         }
       }
     });
+  } else if (currentScreen == "playing") {
+    if (mouseX >= 20 && mouseX <= 50 && mouseY >= 20 && mouseY <= 50) {
+      currentScreen = "menu";
+      return;
+    }
   }
 });
 // function to handle background moving and rendering
@@ -252,6 +257,7 @@ function mainLoop(timestamp) {
     case "playing":
       update(dt);
       drawSprite(dt);
+      drawPauseButton();
       coinMove(dt);
       drawCoin();
       coinPickup();
@@ -452,6 +458,20 @@ function drawCoin() {
     }
   });
 }
+
+// function to add pause button in top of the game
+function drawPauseButton() {
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(20, 20, 30, 30);
+
+  CTX.fillStyle = "black";
+  CTX.font = "bold 20px Arial";
+  CTX.textAlign = "center";
+  CTX.textBaseline = "middle";
+  CTX.fillText("||", 35, 35);
+}
+
+
 //function for coin pickup detection
 function coinPickup() {
   coins.forEach((coin) => {
