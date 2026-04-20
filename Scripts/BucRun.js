@@ -110,11 +110,16 @@ let scenes = [
 ]
 
 let gameScene = [
-  "",
-  "",
-  "",
-  ""
+  "0001000100010001",
+  "1010101010101010",
+  "0100010001000100",
+  "0000000000000000"
 ]
+
+let gameObstacles = {
+  x: 400,
+  y: 250
+}
 
 
 //======================================================================================
@@ -227,6 +232,8 @@ function backgroundF(dt) {
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
 }
 
+
+
 // main loop to handle screen rendering and game updates
 function mainLoop(timestamp) {
   // calculate delta time in seconds
@@ -285,8 +292,7 @@ function mainLoop(timestamp) {
       coinMove(dt);
       drawCoin();
       coinPickup();
-      spawnCoin(player.x + 800, player.y);
-
+      obstacleDraw();
       break;
     case "shop":
       drawShop();
@@ -299,11 +305,28 @@ function mainLoop(timestamp) {
 
 //function to handle generation of obstacles
 function obstacleGeneration() {
+  for(let i = 0; i < scenes[0].length; i++) {
+    gameScene[i] = gameScene[i] + scenes[0][i];
+  }
+}
+//function to draw obstacles
+function obstacleDraw() {
   gridSize = 45; 
-
-  for(y = 0; y < scenes[0].length; y++) {
-    for(x = 0; x < scenes[0][0].length; x) {
-      
+  gameObstacles.x -= background.speed;
+  if(gameObstacles.x <= -45) {
+    gameObstacles.x += 45;
+    for(let i = 0; i < gameScene.length; i++) {
+      gameScene[i] = gameScene[i].slice(1);
+    }
+  }
+  if(gameObstacles.x + 45 * (gameScene[0].length) < 800) {
+    obstacleGeneration();
+  }
+  for(let y = 0; y < gameScene.length; y++) {
+    for(let x = 0; x < gameScene[0].length; x++) {
+      if(obstacles[gameScene[y][x]][0] != null) {
+        CTX.drawImage(obstacles[gameScene[y][x]][0], gameObstacles.x + x * gridSize, gameObstacles.y + y * gridSize);
+      }
     }
   }
 }
