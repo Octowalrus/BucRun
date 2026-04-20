@@ -20,6 +20,26 @@ const CHARACTER_SPRITES = {
       land: "Assets/Bucky/run2.png",
     },
   },
+  Ninja: {
+    previewSrc: "Assets/Ninja/standA.png",
+    frames: {
+      standA: "Assets/Ninja/standA.png",
+      standB: "Assets/Ninja/standB.png",
+      prejump: "Assets/Ninja/run1.png",
+      jump: "Assets/Ninja/jump.png",
+      land: "Assets/Ninja/run2.png",
+    },
+  },
+  Hobo: {
+    previewSrc: "Assets/Hobo/standA.png",
+    frames: {
+      standA: "Assets/Hobo/standA.png",
+      standB: "Assets/Hobo/standB.png",
+      prejump: "Assets/Hobo/run1.png",
+      jump: "Assets/Hobo/jump.png",
+      land: "Assets/Hobo/run2.png",
+    },
+  },
   Template: {
     previewSrc: "Assets/Template/standA.png",
     frames: {
