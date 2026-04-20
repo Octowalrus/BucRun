@@ -11,6 +11,7 @@ const GRID = {
 
 const CHARACTER_SPRITES = {
   Bucky: {
+    size: 60,
     previewSrc: "Assets/Bucky/standA.png",
     frames: {
       standA: "Assets/Bucky/standA.png",
@@ -21,6 +22,7 @@ const CHARACTER_SPRITES = {
     },
   },
   Ninja: {
+    size: 60,
     previewSrc: "Assets/Ninja/standA.png",
     frames: {
       standA: "Assets/Ninja/standA.png",
@@ -31,6 +33,7 @@ const CHARACTER_SPRITES = {
     },
   },
   Hobo: {
+    size: 60,
     previewSrc: "Assets/Hobo/standA.png",
     frames: {
       standA: "Assets/Hobo/standA.png",
@@ -41,6 +44,7 @@ const CHARACTER_SPRITES = {
     },
   },
   Template: {
+    size: 80,
     previewSrc: "Assets/Template/standA.png",
     frames: {
       standA: "Assets/Template/standA.png",
@@ -65,7 +69,7 @@ UPGRADE_SPRITES = {
 }
 
 // This changes the selected sprite's animations to make active character.
-const SELECTED_CHARACTER = "Bucky";
+const SELECTED_CHARACTER = "Template";
 const ACTIVE_CHARACTER =
   CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
 
@@ -140,7 +144,7 @@ const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping
 let player = {
   x: 20,
   y: 330,
-  size: 60,
+  size: CHARACTER_SPRITES[SELECTED_CHARACTER].size,
   speed: 10,
   velocityY: 0,
   gravity: 0.3,
