@@ -22,7 +22,12 @@ let shopItems = [
     owned: false,
     src: "Assets/Template/standA.png",
   },
-  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
+  {
+    name: "Place Holder 3",
+    cost: 30,
+    owned: false,
+    src: ""
+  },
 ];
 
 // main variable to track the current screen (menu or playing)
