@@ -56,9 +56,9 @@ const CHARACTER_SPRITES = {
   },
 };
 
-UPGRADE_SPRITES = {
+const UPGRADE_SPRITES = {
   doubleJump: {
-    src: "Assets/DoubleJump/doublejump.png",
+    previewSrc: "Assets/DoubleJump/doublejump.png",
   },
   magnet: {
     previewSrc: "Assets/Magnet/magnet.png",
@@ -96,6 +96,9 @@ let shopItems = [
     name: "Double Jump",
     cost: 50,
     owned: false,
+    equipped: false,
+    type: "upgrade",
+    upgradeId: "doubleJump",
     src: UPGRADE_SPRITES.doubleJump.previewSrc
   },
 ];
@@ -151,6 +154,8 @@ let player = {
   onGround: true,
 
   state: "stand",
+  jumpStartY: GROUND_Y,
+  jumpsUsed: 0,
   prejumpTimer: 0,
   landingTimer: 0,
 };
@@ -174,6 +179,28 @@ let lastTime = 0;
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
+function isJumpKey(key) {
+  return key === "w" || key === " " || key === "arrowup";
+}
+
+function isUpgradeEquipped(upgradeId) {
+  return shopItems.some((item) => {
+    return item.type === "upgrade" && item.upgradeId === upgradeId && item.equipped;
+  });
+}
+
+function getMaxJumpCount() {
+  return isUpgradeEquipped("doubleJump") ? 2 : 1;
+}
+
+function startJump() {
+  player.jumpStartY = player.y;
+  player.velocityY = -player.speed;
+  player.state = "jump";
+  player.onGround = false;
+  player.jumpsUsed++;
+}
+
 spawnCoin(player.x + 800, player.y);
 
 // wait until all images are loaded
@@ -195,11 +222,20 @@ document.addEventListener("keydown", (e) => {
 
   const KEY = e.key.toLowerCase();
 
-  if ((KEY === "w" || KEY === " " || KEY === "arrowup") && player.onGround) {
+  if (!isJumpKey(KEY)) return;
+
+  if (player.onGround && player.state !== "prejump") {
     player.state = "prejump";
     player.prejumpTimer = .1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
+    return;
+  }
+
+  if (!player.onGround && player.state !== "prejump" && player.jumpsUsed < getMaxJumpCount()) {
+    startJump();
+    jumpQueued = false;
+    jumpKeyHeld = true;
   }
 });
 
@@ -207,7 +243,7 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   const KEY = e.key.toLowerCase();
 
-  if (KEY === "w" || KEY === " " || KEY === "arrowup") {
+  if (isJumpKey(KEY)) {
     jumpKeyHeld = false; // stop tracking the jump key being held
   }
 });
@@ -266,6 +302,11 @@ CANVAS.addEventListener("click", (e) => {
         // TO DO: Add connection to a coin count
         if (!item.owned) {
           item.owned = true;
+          if (item.type === "upgrade") {
+            item.equipped = true;
+          }
+        } else if (item.type === "upgrade") {
+          item.equipped = !item.equipped;
         }
       }
     });
@@ -362,9 +403,7 @@ function update(dt) {
     player.prejumpTimer -= dt;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed;
-      player.state = "jump";
-      player.onGround = false;
+      startJump();
       jumpQueued = false;
     }
   }
@@ -380,8 +419,9 @@ function update(dt) {
     // update y position based on velocity
     player.y += player.velocityY * dt * 60;
   }
-  // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
-  if (player.y <= GROUND_Y - MAX_JUMP_HEIGHT) {
+  // Limit each jump based on where that jump started, so a double jump adds height.
+  if (player.velocityY < 0 && player.y <= player.jumpStartY - MAX_JUMP_HEIGHT) {
+    player.y = player.jumpStartY - MAX_JUMP_HEIGHT;
     player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
@@ -399,6 +439,8 @@ function update(dt) {
     }
 
     player.onGround = true;
+    player.jumpStartY = GROUND_Y;
+    player.jumpsUsed = 0;
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
@@ -484,7 +526,10 @@ function drawShop() {
     CTX.fillText(item.name, x + GRID.itemWidth / 2, y + 100);
 
     // If item is owned, make text green. Else, make it yellow.
-    if (item.owned) {
+    if (item.equipped) {
+      CTX.fillStyle = "#66ddff";
+      CTX.fillText("EQUIPPED", x + GRID.itemWidth / 2, y + 130);
+    } else if (item.owned) {
       CTX.fillStyle = "green";
       CTX.fillText("OWNED", x + GRID.itemWidth / 2, y + 130);
     } else {
