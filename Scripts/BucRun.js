@@ -181,20 +181,25 @@ let lastTime = 0;
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
+
+// Keys that trigger jump
 function isJumpKey(key) {
   return key === "w" || key === " " || key === "arrowup";
 }
 
+// If an upgrade is equipped, return true. 
 function isUpgradeEquipped(upgradeId) {
   return shopItems.some((item) => {
     return item.type === "upgrade" && item.upgradeId === upgradeId && item.equipped;
   });
 }
 
+// If upgrade is equipped set max jump count to 2, else 1.
 function getMaxJumpCount() {
   return isUpgradeEquipped("doubleJump") ? 2 : 1;
 }
 
+// function to start a jump, setting the initial jump velocity and changing the player state and incrementing jumps used
 function startJump() {
   player.jumpStartY = player.y;
   player.velocityY = -player.speed;
