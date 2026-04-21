@@ -115,6 +115,7 @@ SPRITES.firehydrant.src = "Assets/firehydrant.png";
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }]; // initial coin for testing, will be removed later and coins will be spawned based on distance or time
 let currentCoins = 0; //global storing how many coins the player has currently
+let score = 0; // player's score, which can be based on distance or coins collected, will be implemented later
 const GROUND_Y = 330; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
@@ -670,7 +671,7 @@ function loadGame() {
 }
 // Will apply the loaded game state to the current game, setting coins and shop items to the loaded values
 function applyGameState() {
-  score = gameState.stats.score;
+  score = gameState.stats.highscore;
 
   currentCoins = gameState.stats.coins;
   shopItems = gameState.shop.items;
@@ -678,7 +679,7 @@ function applyGameState() {
 
 // function to update the gameState object with the current values of coins and shop items, which will be called before saving the game
 function updateGameState() {
-  gameState.stats.score = score;
+  gameState.stats.highscore = score;
   gameState.stats.coins = currentCoins;
 
   gameState.shop.items = shopItems;
