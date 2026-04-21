@@ -70,7 +70,7 @@ const UPGRADE_SPRITES = {
 }
 
 // This changes the selected sprite's animations to make active character.
-const SELECTED_CHARACTER = "Template";
+const SELECTED_CHARACTER = "Bucky";
 const ACTIVE_CHARACTER =
   CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
 
@@ -207,8 +207,6 @@ function startJump() {
   player.onGround = false;
   player.jumpsUsed++;
 }
-
-spawnCoin(player.x + 800, player.y);
 
 // wait until all images are loaded
 let loadedCount = 0;
