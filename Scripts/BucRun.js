@@ -44,7 +44,13 @@ const SPRITES = {
   background2: new Image(),
   background3: new Image(),
   background4: new Image(),
+  bridgeForeground: new Image(),
+  bridgeGlassBackground: new Image(),
+  electricScooter: new Image(),
   firehydrant: new Image(),
+  stairsBackground: new Image(),
+  windowFrames: new Image()
+
 };
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = "Assets/Bucky/jump.png";
@@ -58,7 +64,12 @@ SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
 SPRITES.coin.src = "Assets/coin.png";
-SPRITES.firehydrant.src = "Assets/firehydrant.png";
+SPRITES.bridgeForeground.src = "Assets/Obstacles/bridge-foreground.png"
+SPRITES.bridgeGlassBackground.src = "Assets/Obstacles/bridge-glass-background.png"
+SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png"
+SPRITES.firehydrant.src = "Assets/Obstacles/firehydrant.png";
+SPRITES.stairsBackground.src = "Assets/Obstacles/stairs-background.png"
+SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png"
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
@@ -98,7 +109,14 @@ let lastTime = 0;
 //array of arrays holding images and functionality of obstacles
 let obstacles = [
   [null, "none"],
-  [SPRITES.coin, "block"]
+  [null, "block"],
+  [SPRITES.bridgeForeground, "block"],
+  [SPRITES.bridgeGlassBackground, "none"],
+  [SPRITES.electricScooter, "obstacle"],
+  [SPRITES.firehydrant, "obstacle"],
+  [SPRITES.stairsBackground, "none"],
+  [SPRITES.windowFrames, "none"]
+  
 ]
 //array of arrays holding all of the groups of obstacles that will appear
 let scenes = [
@@ -125,7 +143,7 @@ let gameScene = [
 
 let gameObstacles = {
   x: 400,
-  y: 250
+  y: 225
 }
 
 
@@ -319,7 +337,7 @@ function mainLoop(timestamp) {
       coinMove(dt);
       drawCoin();
       coinPickup();
-      obstacleDraw();
+      obstacleDraw(dt);
       break;
     case "shop":
       drawShop();
@@ -332,14 +350,15 @@ function mainLoop(timestamp) {
 
 //function to handle generation of obstacles
 function obstacleGeneration() {
+  let rand = Math.floor(Math.random() * 2)
   for(let i = 0; i < scenes[0].length; i++) {
-    gameScene[i] = gameScene[i] + scenes[0][i];
+    gameScene[i] = gameScene[i] + scenes[rand][i];
   }
 }
 //function to draw obstacles
-function obstacleDraw() {
+function obstacleDraw(dt) {
   gridSize = 45; 
-  gameObstacles.x -= background.speed;
+  gameObstacles.x -= background.speed * dt * 60;
   if(gameObstacles.x <= -45) {
     gameObstacles.x += 45;
     for(let i = 0; i < gameScene.length; i++) {
