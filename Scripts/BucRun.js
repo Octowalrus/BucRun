@@ -105,7 +105,7 @@ let shopItems = [
   },
   {
       name: "Magnet",
-      cost: 40,
+      cost: 100,
       owned: false,
       equipped: false,
       type: "upgrade",
