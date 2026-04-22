@@ -62,7 +62,7 @@ const UPGRADE_SPRITES = {
     previewSrc: "Assets/DoubleJump/doublejump.png",
   },
   magnet: {
-    previewSrc: "Assets/Magnet/magnet.png",
+    previewSrc: "Assets/Magnet/Magnet.png",
   },
   slow_Down: {
     previewSrc: "Assets/SlowDown/slowdown.png",
