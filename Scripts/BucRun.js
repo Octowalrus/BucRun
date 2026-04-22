@@ -674,7 +674,15 @@ function drawPauseOverlay() {
   CTX.font = "bold 48px Arial";
   CTX.textAlign = "center";
   CTX.textBaseline = "middle";
-  CTX.fillText("PAUSED", CANVAS.width / 2, CANVAS.height / 2);
+  CTX.fillText("PAUSED", CANVAS.width / 2, CANVAS.height / 4);
+  // button for exiting to main menu and resuming game
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(CANVAS.width / 2 - 100, CANVAS.height / 2 - 30, 200, 60);
+  CTX.fillStyle = "white";
+  CTX.font = "bold 48px Arial";
+  CTX.textAlign = "center";
+  CTX.textBaseline = "middle";
+  CTX.fillText("Exit", CANVAS.width / 2, CANVAS.height / 2);
   CTX.restore();
 }
 
