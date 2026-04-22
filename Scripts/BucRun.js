@@ -1,13 +1,14 @@
 // Global Variables
 //=======================================================================
+
 const GRID = {
   cols: 4,
   itemWidth: 150,
   itemHeight: 150,
   padding: 20,
   startingX: 70,
-  startingY: 100
-}
+  startingY: 100,
+};
 
 const PAUSE_BUTTON = {
   x: 20,
@@ -73,7 +74,7 @@ const UPGRADE_SPRITES = {
   slow_Down: {
     previewSrc: "Assets/SlowDown/slowdown.png",
   },
-}
+};
 
 // This changes the selected sprite's animations to make active character.
 const SELECTED_CHARACTER = "Bucky";
@@ -81,41 +82,12 @@ const ACTIVE_CHARACTER =
   CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
 
 // List of items in the shop
-let shopItems = [
-  {
-    name: "Ninja",
-    cost: 10,
-    owned: false,
-    src: CHARACTER_SPRITES.Ninja.previewSrc
-  },
-  {
-    name: "Hobo",
-    cost: 20,
-    owned: false,
-    src: CHARACTER_SPRITES.Hobo.previewSrc
-  },
-  { 
-    name: "Blank", 
-    cost: 30, 
-    owned: false, 
-    src: CHARACTER_SPRITES.Template.previewSrc
-  },
-  {
-    name: "Double Jump",
-    cost: 50,
-    owned: false,
-    equipped: false,
-    type: "upgrade",
-    upgradeId: "doubleJump",
-    src: UPGRADE_SPRITES.doubleJump.previewSrc
-  },
-];
+let shopItems = [];
 
 // main variable to track the current screen
 let currentScreen = "menu";
 const CANVAS = document.getElementById("gameCanvas");
 const CTX = CANVAS.getContext("2d");
-let currentCoins = 0; //global storing how many coins the player has currently
 
 // load SPRITES assets of each state
 const SPRITES = {
@@ -147,8 +119,9 @@ SPRITES.coin.src = "Assets/Coin/coin.png";
 SPRITES.firehydrant.src = "Assets/firehydrant.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
-let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
-
+let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }]; // initial coin for testing, will be removed later and coins will be spawned based on distance or time
+let currentCoins = 0; //global storing how many coins the player has currently
+let score = 0; // player's score, which can be based on distance or coins collected, will be implemented later
 const GROUND_Y = 330; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
@@ -184,9 +157,60 @@ let standingFrame = 0;
 let standingFrameCounter = 0;
 let lastTime = 0;
 
+// Object to store the game state, including stats, shop items, and settings. This will be used to store save data and load in save data
+let gameState = {
+  stats: {
+    coins: 0,
+    highscore: 0,
+  },
+  shop: {
+    items: [
+      {
+        name: "Ninja",
+        cost: 10,
+        owned: false,
+        src: CHARACTER_SPRITES.Ninja.previewSrc,
+      },
+      {
+        name: "Hobo",
+        cost: 20,
+        owned: false,
+        src: CHARACTER_SPRITES.Hobo.previewSrc,
+      },
+      {
+        name: "Blank",
+        cost: 30,
+        owned: false,
+        src: CHARACTER_SPRITES.Template.previewSrc,
+      },
+      {
+        name: "Double Jump",
+        cost: 50,
+        owned: false,
+        equipped: false,
+        type: "upgrade",
+        upgradeId: "doubleJump",
+        src: UPGRADE_SPRITES.doubleJump.previewSrc,
+      },
+    ],
+  },
+  settings: {},
+};
+
+shopItems = gameState.shop.items; // localize shop items from game state to global variable for easier access
+
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
+// On window load, attempt to load game state and apply it
+window.onload = () => {
+  if (loadGame()) {
+    applyGameState();
+  } else {
+    console.log("No save found, starting new game");
+  }
+};
+currentCoins = gameState.stats.coins; //global storing how many coins the player has currently
 
 // Keys that trigger jump
 function isJumpKey(key) {
@@ -226,10 +250,12 @@ function togglePause() {
   }
 }
 
-// If an upgrade is equipped, return true. 
+// If an upgrade is equipped, return true.
 function isUpgradeEquipped(upgradeId) {
   return shopItems.some((item) => {
-    return item.type === "upgrade" && item.upgradeId === upgradeId && item.equipped;
+    return (
+      item.type === "upgrade" && item.upgradeId === upgradeId && item.equipped
+    );
   });
 }
 
@@ -277,13 +303,17 @@ document.addEventListener("keydown", (e) => {
 
   if (player.onGround && player.state !== "prejump") {
     player.state = "prejump";
-    player.prejumpTimer = .1; // how many frames to show prejump
+    player.prejumpTimer = 0.1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
     return;
   }
 
-  if (!player.onGround && player.state !== "prejump" && player.jumpsUsed < getMaxJumpCount()) {
+  if (
+    !player.onGround &&
+    player.state !== "prejump" &&
+    player.jumpsUsed < getMaxJumpCount()
+  ) {
     startJump();
     jumpQueued = false;
     jumpKeyHeld = true;
@@ -306,8 +336,19 @@ CANVAS.addEventListener("click", (e) => {
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
 
-  // if the screen is the menu, do outcome of click event
-  if (currentScreen === "menu") {
+  // If the game is paused and the player clicks the exit button, return to the main menu
+  if (currentScreen === "paused") {
+    if (
+      mouseX >= CANVAS.width / 2 - 100 &&
+      mouseX <= CANVAS.width / 2 + 100 &&
+      mouseY >= CANVAS.height / 2 - 30 &&
+      mouseY <= CANVAS.height / 2 + 30
+    ) {
+      currentScreen = "menu";
+      return;
+    }
+    // if the screen is the menu, do outcome of click event
+  } else if (currentScreen === "menu") {
     // check if click is on start or shop button
     // menu button
     if (
@@ -420,6 +461,10 @@ function mainLoop(timestamp) {
       updateGame(dt);
       drawGameFrame(dt);
       drawPauseButton();
+      coinMove(dt);
+      drawCoin();
+      coinPickup();
+
       break;
     case "paused":
       drawGameFrame(0);
@@ -441,7 +486,7 @@ function update(dt) {
   if (player.state === "stand") {
     standingFrameCounter += dt;
 
-    if (standingFrameCounter >= .3) {
+    if (standingFrameCounter >= 0.3) {
       standingFrame = standingFrame === 0 ? 1 : 0;
       standingFrameCounter = 0;
     }
@@ -487,7 +532,7 @@ function update(dt) {
 
     if (wasInAir && player.state !== "land" && player.state !== "prejump") {
       player.state = "land";
-      player.landingTimer = .1;
+      player.landingTimer = 0.1;
     }
 
     player.onGround = true;
@@ -647,7 +692,7 @@ function drawPauseButton(isPaused = false) {
     PAUSE_BUTTON.x,
     PAUSE_BUTTON.y,
     PAUSE_BUTTON.size,
-    PAUSE_BUTTON.size
+    PAUSE_BUTTON.size,
   );
 
   CTX.fillStyle = "black";
@@ -701,4 +746,56 @@ function coinPickup() {
       currentCoins++;
     }
   });
+}
+
+//===============================Save Progress Functions============================================
+
+//Saves on unload of the window
+window.addEventListener("beforeunload", saveGame);
+
+// function to save the game data (currently only coins) to localStorage as a JSON string
+function saveGame() {
+  try {
+    updateGameState(); // make sure gameState is updated with current values before saving
+    const data = JSON.stringify(gameState);
+    localStorage.setItem("myGameSave", data);
+    console.log("Game saved!");
+  } catch (e) {
+    console.error("Save failed:", e);
+  }
+}
+// function to load the game data from localStorage and parse it back into an object, or return null if no data is found
+function loadGame() {
+  try {
+    const data = localStorage.getItem("myGameSave");
+    if (!data) return false;
+
+    gameState = JSON.parse(data);
+    console.log("Game loaded!");
+    return true;
+  } catch (e) {
+    console.error("Load failed:", e);
+    return false;
+  }
+}
+// Will apply the loaded game state to the current game, setting coins and shop items to the loaded values
+function applyGameState() {
+  score = gameState.stats.highscore;
+
+  currentCoins = gameState.stats.coins;
+  shopItems = gameState.shop.items;
+}
+
+// function to update the gameState object with the current values of coins and shop items, which will be called before saving the game
+function updateGameState() {
+  gameState.stats.highscore = score;
+  gameState.stats.coins = currentCoins;
+
+  gameState.shop.items = shopItems;
+}
+
+//reset save data for testing purposes
+function resetGameState() {
+  localStorage.removeItem("myGameSave");
+  console.log("Game state reset!");
 }
