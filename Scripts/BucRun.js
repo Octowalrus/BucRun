@@ -8,7 +8,13 @@ const GRID = {
   padding: 20,
   startingX: 70,
   startingY: 100
-}
+};
+
+const PAUSE_BUTTON = {
+  x: 20,
+  y: 20,
+  size: 30,
+};
 
 const CHARACTER_SPRITES = {
   Bucky: {
@@ -449,6 +455,11 @@ function mainLoop(timestamp) {
       coinPickup();
 
       break;
+    case "paused":
+      drawGameFrame(0);
+      drawPauseOverlay();
+      drawPauseButton(true);
+      break;
     case "shop":
       drawShop();
       break;
@@ -777,3 +788,4 @@ function resetGameState() {
   console.log("Game state reset!");
 }
 ;
+
