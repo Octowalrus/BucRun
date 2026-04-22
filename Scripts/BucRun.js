@@ -690,3 +690,4 @@ function resetGameState() {
   localStorage.removeItem("myGameSave");
   console.log("Game state reset!");
 }
+;
