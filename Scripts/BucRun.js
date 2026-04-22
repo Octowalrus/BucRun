@@ -9,6 +9,12 @@ const GRID = {
   startingY: 100
 }
 
+const PAUSE_BUTTON = {
+  x: 20,
+  y: 20,
+  size: 30,
+};
+
 const CHARACTER_SPRITES = {
   Bucky: {
     size: 60,
@@ -105,7 +111,7 @@ let shopItems = [
   },
 ];
 
-// main variable to track the current screen (menu or playing)
+// main variable to track the current screen
 let currentScreen = "menu";
 const CANVAS = document.getElementById("gameCanvas");
 const CTX = CANVAS.getContext("2d");
@@ -187,6 +193,39 @@ function isJumpKey(key) {
   return key === "w" || key === " " || key === "arrowup";
 }
 
+// Keys that toggle the pause screen while the game is running.
+function isPauseKey(key) {
+  return key === "p" || key === "escape";
+}
+
+function isPauseButtonClicked(mouseX, mouseY) {
+  return (
+    mouseX >= PAUSE_BUTTON.x &&
+    mouseX <= PAUSE_BUTTON.x + PAUSE_BUTTON.size &&
+    mouseY >= PAUSE_BUTTON.y &&
+    mouseY <= PAUSE_BUTTON.y + PAUSE_BUTTON.size
+  );
+}
+
+function pauseGame() {
+  currentScreen = "paused";
+}
+
+function resumeGame() {
+  currentScreen = "playing";
+}
+
+function togglePause() {
+  if (currentScreen === "playing") {
+    pauseGame();
+    return;
+  }
+
+  if (currentScreen === "paused") {
+    resumeGame();
+  }
+}
+
 // If an upgrade is equipped, return true. 
 function isUpgradeEquipped(upgradeId) {
   return shopItems.some((item) => {
@@ -226,6 +265,13 @@ document.addEventListener("keydown", (e) => {
   if (e.repeat) return;
 
   const KEY = e.key.toLowerCase();
+
+  if (isPauseKey(KEY)) {
+    togglePause();
+    return;
+  }
+
+  if (currentScreen !== "playing") return;
 
   if (!isJumpKey(KEY)) return;
 
@@ -315,9 +361,9 @@ CANVAS.addEventListener("click", (e) => {
         }
       }
     });
-  } else if (currentScreen == "playing") {
-    if (mouseX >= 20 && mouseX <= 50 && mouseY >= 20 && mouseY <= 50) {
-      currentScreen = "menu";
+  } else if (currentScreen === "playing" || currentScreen === "paused") {
+    if (isPauseButtonClicked(mouseX, mouseY)) {
+      togglePause();
       return;
     }
   }
@@ -371,13 +417,14 @@ function mainLoop(timestamp) {
       drawMainMenu();
       break;
     case "playing":
-      update(dt);
-      drawSprite(dt);
+      updateGame(dt);
+      drawGameFrame(dt);
       drawPauseButton();
-      coinMove(dt);
-      drawCoin();
-      coinPickup();
-
+      break;
+    case "paused":
+      drawGameFrame(0);
+      drawPauseOverlay();
+      drawPauseButton(true);
       break;
     case "shop":
       drawShop();
@@ -456,6 +503,18 @@ function update(dt) {
     }
   }
 }
+
+function updateGame(dt) {
+  update(dt);
+  coinMove(dt);
+  coinPickup();
+}
+
+function drawGameFrame(dt) {
+  drawSprite(dt);
+  drawCoin();
+}
+
 // function to draw the main menu screen
 function drawMainMenu() {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
@@ -581,17 +640,51 @@ function drawCoin() {
 }
 
 // function to add pause button in top of the game
-function drawPauseButton() {
+function drawPauseButton(isPaused = false) {
+  CTX.save();
   CTX.fillStyle = "#eeaa00";
-  CTX.fillRect(20, 20, 30, 30);
+  CTX.fillRect(
+    PAUSE_BUTTON.x,
+    PAUSE_BUTTON.y,
+    PAUSE_BUTTON.size,
+    PAUSE_BUTTON.size
+  );
 
   CTX.fillStyle = "black";
-  CTX.font = "bold 20px Arial";
-  CTX.textAlign = "center";
-  CTX.textBaseline = "middle";
-  CTX.fillText("||", 35, 35);
+  if (isPaused) {
+    CTX.beginPath();
+    CTX.moveTo(PAUSE_BUTTON.x + 11, PAUSE_BUTTON.y + 8);
+    CTX.lineTo(PAUSE_BUTTON.x + 11, PAUSE_BUTTON.y + 22);
+    CTX.lineTo(PAUSE_BUTTON.x + 22, PAUSE_BUTTON.y + 15);
+    CTX.closePath();
+    CTX.fill();
+  } else {
+    CTX.fillRect(PAUSE_BUTTON.x + 9, PAUSE_BUTTON.y + 8, 4, 14);
+    CTX.fillRect(PAUSE_BUTTON.x + 17, PAUSE_BUTTON.y + 8, 4, 14);
+  }
+  CTX.restore();
 }
 
+function drawPauseOverlay() {
+  CTX.save();
+  CTX.fillStyle = "rgba(0, 0, 0, 0.45)";
+  CTX.fillRect(0, 0, CANVAS.width, CANVAS.height);
+
+  CTX.fillStyle = "white";
+  CTX.font = "bold 48px Arial";
+  CTX.textAlign = "center";
+  CTX.textBaseline = "middle";
+  CTX.fillText("PAUSED", CANVAS.width / 2, CANVAS.height / 4);
+  // button for exiting to main menu and resuming game
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(CANVAS.width / 2 - 100, CANVAS.height / 2 - 30, 200, 60);
+  CTX.fillStyle = "white";
+  CTX.font = "bold 48px Arial";
+  CTX.textAlign = "center";
+  CTX.textBaseline = "middle";
+  CTX.fillText("Exit", CANVAS.width / 2, CANVAS.height / 2);
+  CTX.restore();
+}
 
 //function for coin pickup detection
 function coinPickup() {
