@@ -7,7 +7,7 @@ const GRID = {
   itemHeight: 150,
   padding: 20,
   startingX: 70,
-  startingY: 100
+  startingY: 100,
 };
 
 const PAUSE_BUTTON = {
@@ -336,8 +336,19 @@ CANVAS.addEventListener("click", (e) => {
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
 
-  // if the screen is the menu, do outcome of click event
-  if (currentScreen === "menu") {
+  // If the game is paused and the player clicks the exit button, return to the main menu
+  if (currentScreen === "paused") {
+    if (
+      mouseX >= CANVAS.width / 2 - 100 &&
+      mouseX <= CANVAS.width / 2 + 100 &&
+      mouseY >= CANVAS.height / 2 - 30 &&
+      mouseY <= CANVAS.height / 2 + 30
+    ) {
+      currentScreen = "menu";
+      return;
+    }
+    // if the screen is the menu, do outcome of click event
+  } else if (currentScreen === "menu") {
     // check if click is on start or shop button
     // menu button
     if (
@@ -681,7 +692,7 @@ function drawPauseButton(isPaused = false) {
     PAUSE_BUTTON.x,
     PAUSE_BUTTON.y,
     PAUSE_BUTTON.size,
-    PAUSE_BUTTON.size
+    PAUSE_BUTTON.size,
   );
 
   CTX.fillStyle = "black";
@@ -787,5 +798,3 @@ function resetGameState() {
   localStorage.removeItem("myGameSave");
   console.log("Game state reset!");
 }
-;
-
