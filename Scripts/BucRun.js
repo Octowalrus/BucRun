@@ -710,6 +710,7 @@ function drawPauseButton(isPaused = false) {
   CTX.restore();
 }
 
+//
 function drawPauseOverlay() {
   CTX.save();
   CTX.fillStyle = "rgba(0, 0, 0, 0.45)";
