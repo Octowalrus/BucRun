@@ -6,23 +6,103 @@ const GRID = {
   itemHeight: 150,
   padding: 20,
   startingX: 70,
-  startingY: 100,
+  startingY: 100
+}
+
+const CHARACTER_SPRITES = {
+  Bucky: {
+    size: 60,
+    previewSrc: "Assets/Bucky/standA.png",
+    frames: {
+      standA: "Assets/Bucky/standA.png",
+      standB: "Assets/Bucky/standB.png",
+      prejump: "Assets/Bucky/run1.png",
+      jump: "Assets/Bucky/jump.png",
+      land: "Assets/Bucky/run2.png",
+    },
+  },
+  Ninja: {
+    size: 60,
+    previewSrc: "Assets/Ninja/standA.png",
+    frames: {
+      standA: "Assets/Ninja/standA.png",
+      standB: "Assets/Ninja/standB.png",
+      prejump: "Assets/Ninja/run1.png",
+      jump: "Assets/Ninja/jump.png",
+      land: "Assets/Ninja/run2.png",
+    },
+  },
+  Hobo: {
+    size: 60,
+    previewSrc: "Assets/Hobo/standA.png",
+    frames: {
+      standA: "Assets/Hobo/standA.png",
+      standB: "Assets/Hobo/standB.png",
+      prejump: "Assets/Hobo/run1.png",
+      jump: "Assets/Hobo/jump.png",
+      land: "Assets/Hobo/run2.png",
+    },
+  },
+  Template: {
+    size: 80,
+    previewSrc: "Assets/Template/standA.png",
+    frames: {
+      standA: "Assets/Template/standA.png",
+      standB: "Assets/Template/standB.png",
+      prejump: "Assets/Template/run1.png",
+      jump: "Assets/Template/run2.png",
+      land: "Assets/Template/run3.png",
+    },
+  },
 };
 
+// Images for sprite upgrades in shop
+const UPGRADE_SPRITES = {
+  doubleJump: {
+    previewSrc: "Assets/DoubleJump/doublejump.png",
+  },
+  magnet: {
+    previewSrc: "Assets/Magnet/magnet.png",
+  },
+  slow_Down: {
+    previewSrc: "Assets/SlowDown/slowdown.png",
+  },
+}
+
+// This changes the selected sprite's animations to make active character.
+const SELECTED_CHARACTER = "Bucky";
+const ACTIVE_CHARACTER =
+  CHARACTER_SPRITES[SELECTED_CHARACTER] ?? CHARACTER_SPRITES.Bucky;
+
+// List of items in the shop
 let shopItems = [
   {
-    name: "Place Holder 1",
+    name: "Ninja",
     cost: 10,
     owned: false,
-    src: "Assets/Bucky/standA.png",
+    src: CHARACTER_SPRITES.Ninja.previewSrc
   },
   {
-    name: "Place Holder 2",
+    name: "Hobo",
     cost: 20,
     owned: false,
-    src: "Assets/Template/standA.png",
+    src: CHARACTER_SPRITES.Hobo.previewSrc
   },
-  { name: "Place Holder 3", cost: 30, owned: false, src: "" },
+  { 
+    name: "Blank", 
+    cost: 30, 
+    owned: false, 
+    src: CHARACTER_SPRITES.Template.previewSrc
+  },
+  {
+    name: "Double Jump",
+    cost: 50,
+    owned: false,
+    equipped: false,
+    type: "upgrade",
+    upgradeId: "doubleJump",
+    src: UPGRADE_SPRITES.doubleJump.previewSrc
+  },
 ];
 
 // main variable to track the current screen (menu or playing)
@@ -53,17 +133,17 @@ const SPRITES = {
 
 };
 // sets the source for each sprite to the corresponding image file
-SPRITES.jump.src = "Assets/Bucky/jump.png";
-SPRITES.land.src = "Assets/Bucky/run2.png";
-SPRITES.prejump.src = "Assets/Bucky/run1.png";
-SPRITES.standA.src = "Assets/Bucky/standA.png";
-SPRITES.standB.src = "Assets/Bucky/standB.png";
+SPRITES.jump.src = ACTIVE_CHARACTER.frames.jump;
+SPRITES.land.src = ACTIVE_CHARACTER.frames.land;
+SPRITES.prejump.src = ACTIVE_CHARACTER.frames.prejump;
+SPRITES.standA.src = ACTIVE_CHARACTER.frames.standA;
+SPRITES.standB.src = ACTIVE_CHARACTER.frames.standB;
 SPRITES.background0.src = "Assets/Background/roadsidewalktrees.png";
 SPRITES.background1.src = "Assets/Background/clouds1.png";
 SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
-SPRITES.coin.src = "Assets/coin.png";
+SPRITES.coin.src = "Assets/Coin/coin.png";
 SPRITES.bridgeForeground.src = "Assets/Obstacles/bridge-foreground.png"
 SPRITES.bridgeGlassBackground.src = "Assets/Obstacles/bridge-glass-background.png"
 SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png"
@@ -74,19 +154,21 @@ SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png"
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
 
-const GROUND_Y = 320; // KEEP GROUND_Y same as player.y
+const GROUND_Y = 330; // KEEP GROUND_Y same as player.y
 const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
   x: 20,
-  y: 320,
-  size: 80,
+  y: 330,
+  size: CHARACTER_SPRITES[SELECTED_CHARACTER].size,
   speed: 10,
   velocityY: 0,
   gravity: 0.3,
   onGround: true,
 
   state: "stand",
+  jumpStartY: GROUND_Y,
+  jumpsUsed: 0,
   prejumpTimer: 0,
   landingTimer: 0,
 };
@@ -150,7 +232,32 @@ let gameObstacles = {
 //======================================================================================
 //END OF GLOBAL VARIABLES
 
-spawnCoin(player.x + 800, player.y);
+
+// Keys that trigger jump
+function isJumpKey(key) {
+  return key === "w" || key === " " || key === "arrowup";
+}
+
+// If an upgrade is equipped, return true. 
+function isUpgradeEquipped(upgradeId) {
+  return shopItems.some((item) => {
+    return item.type === "upgrade" && item.upgradeId === upgradeId && item.equipped;
+  });
+}
+
+// If upgrade is equipped set max jump count to 2, else 1.
+function getMaxJumpCount() {
+  return isUpgradeEquipped("doubleJump") ? 2 : 1;
+}
+
+// function to start a jump, setting the initial jump velocity and changing the player state and incrementing jumps used
+function startJump() {
+  player.jumpStartY = player.y;
+  player.velocityY = -player.speed;
+  player.state = "jump";
+  player.onGround = false;
+  player.jumpsUsed++;
+}
 
 // wait until all images are loaded
 let loadedCount = 0;
@@ -171,11 +278,20 @@ document.addEventListener("keydown", (e) => {
 
   const KEY = e.key.toLowerCase();
 
-  if ((KEY === "w" || KEY === " " || KEY === "arrowup") && player.onGround) {
+  if (!isJumpKey(KEY)) return;
+
+  if (player.onGround && player.state !== "prejump") {
     player.state = "prejump";
     player.prejumpTimer = .1; // how many frames to show prejump
     jumpQueued = true; // flag to indicate a jump is queued
     jumpKeyHeld = true; // track if the jump key is being held for jump height control
+    return;
+  }
+
+  if (!player.onGround && player.state !== "prejump" && player.jumpsUsed < getMaxJumpCount()) {
+    startJump();
+    jumpQueued = false;
+    jumpKeyHeld = true;
   }
 });
 
@@ -183,7 +299,7 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("keyup", (e) => {
   const KEY = e.key.toLowerCase();
 
-  if (KEY === "w" || KEY === " " || KEY === "arrowup") {
+  if (isJumpKey(KEY)) {
     jumpKeyHeld = false; // stop tracking the jump key being held
   }
 });
@@ -241,9 +357,19 @@ CANVAS.addEventListener("click", (e) => {
         // TO DO: Add connection to a coin count
         if (!item.owned) {
           item.owned = true;
+          if (item.type === "upgrade") {
+            item.equipped = true;
+          }
+        } else if (item.type === "upgrade") {
+          item.equipped = !item.equipped;
         }
       }
     });
+  } else if (currentScreen == "playing") {
+    if (mouseX >= 20 && mouseX <= 50 && mouseY >= 20 && mouseY <= 50) {
+      currentScreen = "menu";
+      return;
+    }
   }
 });
 // function to handle background moving and rendering
@@ -278,7 +404,6 @@ function backgroundF(dt) {
 }
 
 
-
 // main loop to handle screen rendering and game updates
 function mainLoop(timestamp) {
   // calculate delta time in seconds
@@ -299,10 +424,10 @@ function mainLoop(timestamp) {
     case "playing":
       update(dt);
       drawSprite(dt);
+      drawPauseButton();
       coinMove(dt);
       drawCoin();
       coinPickup();
-      spawnCoin(player.x + 800, player.y);
 
       break;
     case "shop":
@@ -334,9 +459,11 @@ function mainLoop(timestamp) {
     case "playing":
       update(dt);
       drawSprite(dt);
+      drawPauseButton();
       coinMove(dt);
       drawCoin();
       coinPickup();
+      
       obstacleDraw(dt);
       break;
     case "shop":
@@ -396,9 +523,7 @@ function update(dt) {
     player.prejumpTimer -= dt;
     // when prejump timer reaches 0 and jump is queued, initiates the jump based off jump velocity and changes the state to jump
     if (player.prejumpTimer <= 0 && jumpQueued) {
-      player.velocityY = -player.speed;
-      player.state = "jump";
-      player.onGround = false;
+      startJump();
       jumpQueued = false;
     }
   }
@@ -414,8 +539,9 @@ function update(dt) {
     // update y position based on velocity
     player.y += player.velocityY * dt * 60;
   }
-  // if the player is above the maximum jump height, start applying stronger gravity and treat as if jump key was released to prevent further rising
-  if (player.y <= GROUND_Y - MAX_JUMP_HEIGHT) {
+  // Limit each jump based on where that jump started, so a double jump adds height.
+  if (player.velocityY < 0 && player.y <= player.jumpStartY - MAX_JUMP_HEIGHT) {
+    player.y = player.jumpStartY - MAX_JUMP_HEIGHT;
     player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
@@ -433,6 +559,8 @@ function update(dt) {
     }
 
     player.onGround = true;
+    player.jumpStartY = GROUND_Y;
+    player.jumpsUsed = 0;
   }
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
@@ -506,17 +634,22 @@ function drawShop() {
     CTX.fillStyle = "#222";
     CTX.fillRect(x, y, GRID.itemWidth, GRID.itemHeight);
 
-    // Draw image of cosmetic
+    // Center the preview horizontally within the shop card.
     const img = new Image();
+    const previewSize = player.size;
+    const previewX = x + (GRID.itemWidth - previewSize) / 2;
     img.src = item.src;
-    CTX.drawImage(img, x + 20, y + 20, player.size, player.size);
+    CTX.drawImage(img, previewX, y + 20, previewSize, previewSize);
 
     CTX.fillStyle = "white";
     CTX.font = "16px Arial";
     CTX.fillText(item.name, x + GRID.itemWidth / 2, y + 100);
 
     // If item is owned, make text green. Else, make it yellow.
-    if (item.owned) {
+    if (item.equipped) {
+      CTX.fillStyle = "#66ddff";
+      CTX.fillText("EQUIPPED", x + GRID.itemWidth / 2, y + 130);
+    } else if (item.owned) {
       CTX.fillStyle = "green";
       CTX.fillText("OWNED", x + GRID.itemWidth / 2, y + 130);
     } else {
@@ -561,6 +694,20 @@ function drawCoin() {
     }
   });
 }
+
+// function to add pause button in top of the game
+function drawPauseButton() {
+  CTX.fillStyle = "#eeaa00";
+  CTX.fillRect(20, 20, 30, 30);
+
+  CTX.fillStyle = "black";
+  CTX.font = "bold 20px Arial";
+  CTX.textAlign = "center";
+  CTX.textBaseline = "middle";
+  CTX.fillText("||", 35, 35);
+}
+
+
 //function for coin pickup detection
 function coinPickup() {
   coins.forEach((coin) => {
