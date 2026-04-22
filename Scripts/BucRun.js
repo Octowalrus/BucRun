@@ -129,7 +129,12 @@ const SPRITES = {
   electricScooter: new Image(),
   firehydrant: new Image(),
   stairsBackground: new Image(),
-  windowFrames: new Image()
+  windowFrames: new Image(),
+  blueCar: new Image(),
+  blueSUV: new Image(),
+  orangeCar: new Image(),
+  redTruck: new Image(),
+  redCar: new Image()
 
 };
 // sets the source for each sprite to the corresponding image file
@@ -150,6 +155,11 @@ SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png"
 SPRITES.firehydrant.src = "Assets/Obstacles/firehydrant.png";
 SPRITES.stairsBackground.src = "Assets/Obstacles/stairs-background.png"
 SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png"
+SPRITES.blueCar.src = "Assets/Cars/blue_car.png"
+SPRITES.blueSUV.src = "Assets/Cars/blue_suv.png"
+SPRITES.orangeCar.src = "Assets/Cars/orange_car.png"
+SPRITES.redTruck.src = "Assets/Cars/red_truck.png"
+SPRITES.redCar.src = "Assets/Cars/red-car.png"
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
@@ -191,35 +201,41 @@ let lastTime = 0;
 //array of arrays holding images and functionality of obstacles
 let obstacles = [
   [null, "none"],
-  [null, "block"],
+  [SPRITES.coin, "block"],
   [SPRITES.bridgeForeground, "block"],
   [SPRITES.bridgeGlassBackground, "none"],
   [SPRITES.electricScooter, "obstacle"],
   [SPRITES.firehydrant, "obstacle"],
   [SPRITES.stairsBackground, "none"],
-  [SPRITES.windowFrames, "none"]
+  [SPRITES.windowFrames, "none"],
+  [SPRITES.blueCar, "block"],
+  [SPRITES.blueSUV, "block"],
+  [SPRITES.orangeCar, "block"],
+  [SPRITES.redTruck, "block"],
+  [SPRITES.redCar, "block"]
+  
   
 ]
 //array of arrays holding all of the groups of obstacles that will appear
 let scenes = [
   [
     "0000000000000000",
-    "0001000100010001",
-    "1010101010101010",
-    "0100010001000100"
+    "1111111111111111",
+    "0080000000090000",
+    "0000000000000000"
   ],
   [
-    "0001000100010001",
-    "1010101010101010",
-    "0100010001000100",
+    "0000000000000000",
+    "0000000000000000",
+    "0000000000000000",
     "0000000000000000"
   ]
 ]
 
 let gameScene = [
-  "0001000100010001",
-  "1010101010101010",
-  "0100010001000100",
+  "0000000000000000",
+  "0000000000000000",
+  "0000000000000000",
   "0000000000000000"
 ]
 
@@ -428,43 +444,9 @@ function mainLoop(timestamp) {
       coinMove(dt);
       drawCoin();
       coinPickup();
-
-      break;
-    case "shop":
-      drawShop();
-      break;
-  }
-
-  // call the function again
-  requestAnimationFrame(mainLoop);
-}
-
-// main loop to handle screen rendering and game updates
-function mainLoop(timestamp) {
-  // calculate delta time in seconds
-  let dt = (timestamp - lastTime) / 1000;
-  lastTime = timestamp;
-
-  // clamp dt (prevents huge jumps if tab was inactive)
-  if (dt > 0.1) dt = 0.1;
-
-  // clear CANVAS
-  CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
-  // switch statement to change between the screens
-  switch (currentScreen) {
-    case "menu":
-      drawMainMenu();
-      break;
-    case "playing":
-      update(dt);
-      drawSprite(dt);
-      drawPauseButton();
-      coinMove(dt);
-      drawCoin();
-      coinPickup();
       
       obstacleDraw(dt);
+      CTX.drawImage(SPRITES.blueCar, 0, 0);
       break;
     case "shop":
       drawShop();
