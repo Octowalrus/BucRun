@@ -126,6 +126,9 @@ let slowDowns = [];
 //Slow down spawn delay
 let slowDownSpawnTimer = 0;
 
+//When halved, the jump animation becomes half the speed but reaches the same height
+let timeScale = 1;
+
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }]; // initial coin for testing, will be removed later and coins will be spawned based on distance or time
 let currentCoins = 0; //global storing how many coins the player has currently
@@ -526,17 +529,17 @@ function update(dt) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity * dt * 60; // slow down gravity while holding
+      player.velocityY += player.gravity * dt * 60 * timeScale; // slow down gravity while holding
     } else {
-      player.velocityY += player.gravity * 3 * dt * 60; // normal gravity
+      player.velocityY += player.gravity * 3 * dt * 60 * timeScale; // normal gravity
     }
     // update y position based on velocity
-    player.y += player.velocityY * dt * 60;
+    player.y += player.velocityY * dt * 60 * timeScale;
   }
   // Limit each jump based on where that jump started, so a double jump adds height.
   if (player.velocityY < 0 && player.y <= player.jumpStartY - MAX_JUMP_HEIGHT) {
     player.y = player.jumpStartY - MAX_JUMP_HEIGHT;
-    player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
+    player.velocityY += player.gravity * 6 * dt * 60 * timeScale; // slowly start falling down if above max jump height
     jumpKeyHeld = false; // treat as if jump key was released
   }
 
@@ -839,9 +842,11 @@ function slowDownPickup() {
 // slows down the game for 3 seconds, once timed out, returns to normal speed
 function slowDown() {
   background.speed = 3;
+  timeScale = 0.5;
 
   setTimeout(() => {
     background.speed = 6;
+    timeScale = 1;
   }, 3000);
 }
 
