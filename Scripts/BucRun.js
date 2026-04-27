@@ -96,7 +96,8 @@ const SPRITES = {
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
-  coin: new Image(),
+  coin: new Image(), //coin image
+  slow_Down: new Image(), //slowdown image
   background0: new Image(),
   background1: new Image(),
   background2: new Image(),
@@ -126,19 +127,18 @@ SPRITES.background1.src = "Assets/Background/clouds1.png";
 SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
+SPRITES.slow_Down.src = "Assets/SlowDown/slowdown.png";
 SPRITES.coin.src = "Assets/Coin/coin.png";
-SPRITES.bridgeForeground.src = "Assets/Obstacles/bridge-foreground.png";
-SPRITES.bridgeGlassBackground.src =
-  "Assets/Obstacles/bridge-glass-background.png";
-SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png";
-SPRITES.firehydrant.src = "Assets/Obstacles/firehydrant.png";
-SPRITES.stairsBackground.src = "Assets/Obstacles/stairs-background.png";
-SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png";
-SPRITES.blueCar.src = "Assets/Cars/blue_car.png";
-SPRITES.blueSUV.src = "Assets/Cars/blue_suv.png";
-SPRITES.orangeCar.src = "Assets/Cars/orange_car.png";
-SPRITES.redTruck.src = "Assets/Cars/red_truck.png";
-SPRITES.redCar.src = "Assets/Cars/red-car.png";
+SPRITES.firehydrant.src = "Assets/firehydrant.png";
+
+//Slow down array
+let slowDowns = [];
+
+//Slow down spawn delay
+let slowDownSpawnTimer = 0;
+
+//When halved, the jump animation becomes half the speed but reaches the same height
+let timeScale = 1;
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
 let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
@@ -261,6 +261,15 @@ let gameState = {
         type: "upgrade",
         upgradeId: "doubleJump",
         src: UPGRADE_SPRITES.doubleJump.previewSrc,
+      },
+      {
+        name: "Slow Down",
+        cost: 50,
+        owned: false,
+        equipped: false,
+        type: "upgrade",
+        upgradeId: "slow_Down",
+        src: UPGRADE_SPRITES.slow_Down.previewSrc,
       },
     ],
   },
@@ -753,19 +762,19 @@ function update(dt) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity * dt * 60;
+      player.velocityY += player.gravity * dt * 60 * timeScale; // slow down gravity while holding
     } else {
-      player.velocityY += player.gravity * 3 * dt * 60;
+      player.velocityY += player.gravity * 3 * dt * 60 * timeScale; // normal gravity
     }
     // update y position based on velocity
-    player.y += player.velocityY * dt * 60;
+    player.y += player.velocityY * dt * 60 * timeScale;
   }
 
   // Limit each jump based on where that jump started, so a double jump adds height.
   if (player.velocityY < 0 && player.y <= player.jumpStartY - MAX_JUMP_HEIGHT) {
     player.y = player.jumpStartY - MAX_JUMP_HEIGHT;
-    player.velocityY += player.gravity * 6 * dt * 60;
-    jumpKeyHeld = false;
+    player.velocityY += player.gravity * 6 * dt * 60 * timeScale; // slowly start falling down if above max jump height
+    jumpKeyHeld = false; // treat as if jump key was released
   }
 
   // if the player has reached the ground, reset the y position and velocity, and handle landing state
@@ -803,11 +812,24 @@ function updateGame(dt) {
   handleObstacleCollision(previousPlayerY);
 
   coinMove(dt);
+  slowDownMove(dt)
+
+  slowDownPickup();
   coinPickup();
+
+  //slow down logic
+  slowDownSpawnTimer += dt;
+
+  if (slowDownSpawnTimer >= 10) {
+    spawnSlowDown();
+    slowDownSpawnTimer = 0;
+  }
 }
 
 function drawGameFrame(dt) {
   drawSprite(dt);
+  drawCoin();
+  drawSlowDown();
 }
 
 // function to draw the main menu screen
@@ -998,6 +1020,76 @@ function coinPickup() {
       currentCoins++;
     }
   });
+}
+
+//========================= SLOW DOWN UPGRADE FUNCTIONS ===================================================
+
+//ChatGPT: https://chatgpt.com/share/69ee715f-0608-83e8-9420-fccf23fcfc09
+
+//checks if the slow down upgrade is equipped
+function isSlowDownEquipped() {
+  return shopItems.some(item => item.upgradeId === "slow_Down" && item.owned && item.equipped);
+}
+
+//spawns slow down consumable
+function spawnSlowDown() {
+  if (!isSlowDownEquipped()) return;
+
+  const SLOWDOWNITEM = {
+    type: "slow_Down",
+    x: 1000,
+    y: 320,
+    width: 45,
+    height: 45,
+    isCollected: false,
+  };
+
+  slowDowns.push(SLOWDOWNITEM);
+}
+
+// draws slowdown consumable
+function drawSlowDown() {
+  slowDowns.forEach((SLOWDOWNITEM) => {
+      CTX.drawImage(SPRITES.slow_Down, SLOWDOWNITEM.x, SLOWDOWNITEM.y, SLOWDOWNITEM.width, SLOWDOWNITEM.height);
+  });
+}
+
+//move slow down consumables
+function slowDownMove(dt) {
+  slowDowns.forEach((SLOWDOWNITEM) => {
+    SLOWDOWNITEM.x -= background.speed * dt * 60;
+  });
+
+  slowDowns = slowDowns.filter((SLOWDOWNITEM) => SLOWDOWNITEM.x + SLOWDOWNITEM.width > 0)
+}
+
+//detect slow down consumable collision with player
+function slowDownPickup() {
+  slowDowns = slowDowns.filter(SLOWDOWNITEM => {
+    const hit =
+      player.x < SLOWDOWNITEM.x + SLOWDOWNITEM.width &&
+      player.x + player.size > SLOWDOWNITEM.x &&
+      player.y < SLOWDOWNITEM.y + SLOWDOWNITEM.height &&
+      player.y + player.size > SLOWDOWNITEM.y;
+      
+    if (hit && SLOWDOWNITEM.type === "slow_Down") {
+      slowDown();
+      return false; // remove item
+    }
+
+    return true;
+  });
+}
+
+// slows down the game for 3 seconds, once timed out, returns to normal speed
+function slowDown() {
+  background.speed = 3;
+  timeScale = 0.5;
+
+  setTimeout(() => {
+    background.speed = 6;
+    timeScale = 1;
+  }, 3000);
 }
 
 //===============================Save Progress Functions============================================
