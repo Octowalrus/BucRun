@@ -96,7 +96,7 @@ const SPRITES = {
   prejump: new Image(),
   jump: new Image(),
   land: new Image(),
-  coin: new Image(), //coin image
+  coin: new Image(),
   background0: new Image(),
   background1: new Image(),
   background2: new Image(),
@@ -112,9 +112,9 @@ const SPRITES = {
   blueSUV: new Image(),
   orangeCar: new Image(),
   redTruck: new Image(),
-  redCar: new Image()
-
+  redCar: new Image(),
 };
+
 // sets the source for each sprite to the corresponding image file
 SPRITES.jump.src = ACTIVE_CHARACTER.frames.jump;
 SPRITES.land.src = ACTIVE_CHARACTER.frames.land;
@@ -127,24 +127,27 @@ SPRITES.background2.src = "Assets/Background/clouds2.png";
 SPRITES.background3.src = "Assets/Background/clouds3.png";
 SPRITES.background4.src = "Assets/Background/sunsky.png";
 SPRITES.coin.src = "Assets/Coin/coin.png";
-SPRITES.bridgeForeground.src = "Assets/Obstacles/bridge-foreground.png"
-SPRITES.bridgeGlassBackground.src = "Assets/Obstacles/bridge-glass-background.png"
-SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png"
+SPRITES.bridgeForeground.src = "Assets/Obstacles/bridge-foreground.png";
+SPRITES.bridgeGlassBackground.src =
+  "Assets/Obstacles/bridge-glass-background.png";
+SPRITES.electricScooter.src = "Assets/Obstacles/electric-scooterv2.png";
 SPRITES.firehydrant.src = "Assets/Obstacles/firehydrant.png";
-SPRITES.stairsBackground.src = "Assets/Obstacles/stairs-background.png"
-SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png"
-SPRITES.blueCar.src = "Assets/Cars/blue_car.png"
-SPRITES.blueSUV.src = "Assets/Cars/blue_suv.png"
-SPRITES.orangeCar.src = "Assets/Cars/orange_car.png"
-SPRITES.redTruck.src = "Assets/Cars/red_truck.png"
-SPRITES.redCar.src = "Assets/Cars/red-car.png"
+SPRITES.stairsBackground.src = "Assets/Obstacles/stairs-background.png";
+SPRITES.windowFrames.src = "Assets/Obstacles/window-frames.png";
+SPRITES.blueCar.src = "Assets/Cars/blue_car.png";
+SPRITES.blueSUV.src = "Assets/Cars/blue_suv.png";
+SPRITES.orangeCar.src = "Assets/Cars/orange_car.png";
+SPRITES.redTruck.src = "Assets/Cars/red_truck.png";
+SPRITES.redCar.src = "Assets/Cars/red-car.png";
 
 //Array that contains coin's x,y and boolean value that determines if it's been picked up
-let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }]; // initial coin for testing, will be removed later and coins will be spawned based on distance or time
-let currentCoins = 0; //global storing how many coins the player has currently
-let score = 0; // player's score, which can be based on distance or coins collected, will be implemented later
-const GROUND_Y = 330; // KEEP GROUND_Y same as player.y
-const MAX_JUMP_HEIGHT = 125; // maximum height the player can reach when jumping;
+let coins = [{ x: 500, y: 300, width: 40, height: 45, collected: false }];
+let currentCoins = 0;
+let score = 0;
+
+const GROUND_Y = 330;
+const MAX_JUMP_HEIGHT = 125;
+
 // player object with properties for position, size, speed, velocity, gravity, and jump state
 let player = {
   x: 20,
@@ -161,13 +164,14 @@ let player = {
   prejumpTimer: 0,
   landingTimer: 0,
 };
+
 //background object with properties for position, speed, and parallax
 let background = {
-  x0: 0, //road and trees
-  x1: 0, //clouds
-  x2: 0, //clouds
-  x3: 0, //clouds
-  x4: 0, //sun and sky
+  x0: 0,
+  x1: 0,
+  x2: 0,
+  x3: 0,
+  x4: 0,
   speed: 6,
   parallax: 0.8,
 };
@@ -177,52 +181,51 @@ let jumpKeyHeld = false;
 let standingFrame = 0;
 let standingFrameCounter = 0;
 let lastTime = 0;
+
 //array of arrays holding images and functionality of obstacles
 let obstacles = [
   [null, "none"],
-  [SPRITES.coin, "block"],
-  [SPRITES.bridgeForeground, "block"],
-  [SPRITES.bridgeGlassBackground, "none"],
-  [SPRITES.electricScooter, "obstacle"],
+  [null, "block"],
+  [SPRITES.electricScooter, "block"],
   [SPRITES.firehydrant, "obstacle"],
   [SPRITES.stairsBackground, "none"],
-  [SPRITES.windowFrames, "none"],
   [SPRITES.blueCar, "block"],
   [SPRITES.blueSUV, "block"],
   [SPRITES.orangeCar, "block"],
   [SPRITES.redTruck, "block"],
-  [SPRITES.redCar, "block"]
-  
-  
-]
+  [SPRITES.redCar, "block"],
+];
+
 //array of arrays holding all of the groups of obstacles that will appear
 let scenes = [
   [
     "0000000000000000",
-    "1111111111111111",
-    "0080000000090000",
-    "0000000000000000"
+    "0000000000000000",
+    "0000000000000000",
+    "0000000002000000",
   ],
   [
     "0000000000000000",
     "0000000000000000",
     "0000000000000000",
-    "0000000000000000"
-  ]
-]
+    "0000002000000000",
+  ],
+];
 
 let gameScene = [
   "0000000000000000",
   "0000000000000000",
   "0000000000000000",
-  "0000000000000000"
-]
+  "0000000000000000",
+];
 
 let gameObstacles = {
   x: 400,
-  y: 225
-}
+  y: 205,
+};
 
+const OBSTACLE_GRID_SIZE = 45;
+const LANDING_TOLERANCE = 12;
 
 // Object to store the game state, including stats, shop items, and settings. This will be used to store save data and load in save data
 let gameState = {
@@ -264,7 +267,7 @@ let gameState = {
   settings: {},
 };
 
-shopItems = gameState.shop.items; // localize shop items from game state to global variable for easier access
+shopItems = gameState.shop.items;
 
 //======================================================================================
 //END OF GLOBAL VARIABLES
@@ -277,7 +280,8 @@ window.onload = () => {
     console.log("No save found, starting new game");
   }
 };
-currentCoins = gameState.stats.coins; //global storing how many coins the player has currently
+
+currentCoins = gameState.stats.coins;
 
 // Keys that trigger jump
 function isJumpKey(key) {
@@ -370,9 +374,9 @@ document.addEventListener("keydown", (e) => {
 
   if (player.onGround && player.state !== "prejump") {
     player.state = "prejump";
-    player.prejumpTimer = 0.1; // how many frames to show prejump
-    jumpQueued = true; // flag to indicate a jump is queued
-    jumpKeyHeld = true; // track if the jump key is being held for jump height control
+    player.prejumpTimer = 0.1;
+    jumpQueued = true;
+    jumpKeyHeld = true;
     return;
   }
 
@@ -392,9 +396,10 @@ document.addEventListener("keyup", (e) => {
   const KEY = e.key.toLowerCase();
 
   if (isJumpKey(KEY)) {
-    jumpKeyHeld = false; // stop tracking the jump key being held
+    jumpKeyHeld = false;
   }
 });
+
 // listens for clicks on the CANVAS for navigating the menu
 CANVAS.addEventListener("click", (e) => {
   // get mouse position relative to the canvas
@@ -475,6 +480,7 @@ CANVAS.addEventListener("click", (e) => {
     }
   }
 });
+
 // function to handle background moving and rendering
 function backgroundF(dt) {
   background.x0 -= background.speed * dt * 60;
@@ -506,7 +512,6 @@ function backgroundF(dt) {
   CTX.drawImage(SPRITES.background0, background.x0 + 1600, 0);
 }
 
-
 // main loop to handle screen rendering and game updates
 function mainLoop(timestamp) {
   // calculate delta time in seconds
@@ -524,22 +529,22 @@ function mainLoop(timestamp) {
     case "menu":
       drawMainMenu();
       break;
+
     case "playing":
       updateGame(dt);
       drawGameFrame(dt);
       drawPauseButton();
-      coinMove(dt);
+      obstacleDraw();
       drawCoin();
-      coinPickup();
-      
-      obstacleDraw(dt);
-      CTX.drawImage(SPRITES.blueCar, 0, 0);
       break;
+
     case "paused":
       drawGameFrame(0);
+      obstacleDraw();
       drawPauseOverlay();
       drawPauseButton(true);
       break;
+
     case "shop":
       drawShop();
       break;
@@ -551,32 +556,173 @@ function mainLoop(timestamp) {
 
 //function to handle generation of obstacles
 function obstacleGeneration() {
-  let rand = Math.floor(Math.random() * 2)
-  for(let i = 0; i < scenes[0].length; i++) {
+  let rand = Math.floor(Math.random() * scenes.length);
+  for (let i = 0; i < scenes[0].length; i++) {
     gameScene[i] = gameScene[i] + scenes[rand][i];
   }
 }
-//function to draw obstacles
-function obstacleDraw(dt) {
-  gridSize = 45; 
+
+// Move obstacle grid without drawing it.
+function updateObstacles(dt) {
   gameObstacles.x -= background.speed * dt * 60;
-  if(gameObstacles.x <= -45) {
-    gameObstacles.x += 45;
-    for(let i = 0; i < gameScene.length; i++) {
+
+  if (gameObstacles.x <= -OBSTACLE_GRID_SIZE) {
+    gameObstacles.x += OBSTACLE_GRID_SIZE;
+
+    for (let i = 0; i < gameScene.length; i++) {
       gameScene[i] = gameScene[i].slice(1);
     }
   }
-  if(gameObstacles.x + 45 * (gameScene[0].length) < 800) {
+
+  if (
+    gameObstacles.x + OBSTACLE_GRID_SIZE * gameScene[0].length <
+    CANVAS.width
+  ) {
     obstacleGeneration();
   }
-  for(let y = 0; y < gameScene.length; y++) {
-    for(let x = 0; x < gameScene[0].length; x++) {
-      if(obstacles[gameScene[y][x]][0] != null) {
-        CTX.drawImage(obstacles[gameScene[y][x]][0], gameObstacles.x + x * gridSize, gameObstacles.y + y * gridSize);
+}
+
+//function to draw obstacles
+function obstacleDraw() {
+  for (let y = 0; y < gameScene.length; y++) {
+    for (let x = 0; x < gameScene[0].length; x++) {
+      const obstacleIndex = Number(gameScene[y][x]);
+
+      if (obstacles[obstacleIndex][0] != null) {
+        CTX.drawImage(
+          obstacles[obstacleIndex][0],
+          gameObstacles.x + x * OBSTACLE_GRID_SIZE,
+          gameObstacles.y + y * OBSTACLE_GRID_SIZE,
+          OBSTACLE_GRID_SIZE,
+          OBSTACLE_GRID_SIZE
+        );
       }
     }
   }
 }
+
+// Basic rectangle overlap helper.
+function rectsOverlap(a, b) {
+  return (
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+  );
+}
+
+// Acts like pressing Exit.
+function exitToMenu() {
+  currentScreen = "menu";
+}
+
+// Makes the player land on top of either the real ground or a block.
+function landOnSurface(surfaceY) {
+  const wasInAir = !player.onGround || player.state === "jump";
+
+  player.y = surfaceY - player.size;
+  player.velocityY = 0;
+  player.onGround = true;
+  player.jumpStartY = player.y;
+  player.jumpsUsed = 0;
+
+  if (wasInAir && player.state !== "land" && player.state !== "prejump") {
+    player.state = "land";
+    player.landingTimer = 0.1;
+  }
+}
+
+// Checks whether the player's feet are still supported by a block.
+function isBlockUnderPlayer() {
+  const playerFeetY = player.y + player.size + 2;
+
+  const leftFootX = player.x + 5;
+  const rightFootX = player.x + player.size - 5;
+
+  for (let row = 0; row < gameScene.length; row++) {
+    for (let col = 0; col < gameScene[row].length; col++) {
+      const obstacleIndex = Number(gameScene[row][col]);
+      const obstacleType = obstacles[obstacleIndex]?.[1];
+
+      if (obstacleType !== "block") continue;
+
+      const blockLeft = gameObstacles.x + col * OBSTACLE_GRID_SIZE;
+      const blockRight = blockLeft + OBSTACLE_GRID_SIZE;
+      const blockTop = gameObstacles.y + row * OBSTACLE_GRID_SIZE;
+
+      const feetAreHorizontallyOnBlock =
+        rightFootX > blockLeft && leftFootX < blockRight;
+
+      const feetAreOnTopOfBlock = Math.abs(playerFeetY - blockTop) <= 4;
+
+      if (feetAreHorizontallyOnBlock && feetAreOnTopOfBlock) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Handles collision between the player hitbox and block tiles.
+function handleObstacleCollision(previousPlayerY) {
+  const playerBox = {
+    x: player.x,
+    y: player.y,
+    width: player.size,
+    height: player.size,
+  };
+
+  const previousBottom = previousPlayerY + player.size;
+  let landedOnBlock = false;
+
+  for (let row = 0; row < gameScene.length; row++) {
+    for (let col = 0; col < gameScene[row].length; col++) {
+      const obstacleIndex = Number(gameScene[row][col]);
+      const obstacleType = obstacles[obstacleIndex]?.[1];
+
+      if (obstacleType !== "block") continue;
+
+      const blockBox = {
+        x: gameObstacles.x + col * OBSTACLE_GRID_SIZE,
+        y: gameObstacles.y + row * OBSTACLE_GRID_SIZE,
+        width: OBSTACLE_GRID_SIZE,
+        height: OBSTACLE_GRID_SIZE,
+      };
+
+      if (!rectsOverlap(playerBox, blockBox)) continue;
+
+      const playerBottom = player.y + player.size;
+      const blockTop = blockBox.y;
+
+      const isLanding =
+        player.velocityY >= 0 &&
+        previousBottom <= blockTop + LANDING_TOLERANCE &&
+        playerBottom >= blockTop;
+
+      if (isLanding) {
+        landOnSurface(blockTop);
+        landedOnBlock = true;
+      } else {
+        exitToMenu();
+        return;
+      }
+    }
+  }
+  
+  if (
+    player.onGround &&
+    player.y < GROUND_Y &&
+    !landedOnBlock &&
+    !isBlockUnderPlayer()
+  ) {
+    player.onGround = false;
+    player.state = "jump";
+    player.velocityY = 0;
+  }
+
+}
+
 // main update function to handle player movement, jumping, and landing logic
 function update(dt) {
   // alternate standing frame every 20 frames
@@ -601,23 +747,25 @@ function update(dt) {
       jumpQueued = false;
     }
   }
+
   // if the player is in the air, apply gravity to the velocity and update the y position
   if (!player.onGround) {
     // variable jump: reduce gravity if jump key is still held
     if (player.velocityY < 0 && jumpKeyHeld) {
       // while moving up and holding key, gravity is weaker
-      player.velocityY += player.gravity * dt * 60; // slow down gravity while holding
+      player.velocityY += player.gravity * dt * 60;
     } else {
-      player.velocityY += player.gravity * 3 * dt * 60; // normal gravity
+      player.velocityY += player.gravity * 3 * dt * 60;
     }
     // update y position based on velocity
     player.y += player.velocityY * dt * 60;
   }
+
   // Limit each jump based on where that jump started, so a double jump adds height.
   if (player.velocityY < 0 && player.y <= player.jumpStartY - MAX_JUMP_HEIGHT) {
     player.y = player.jumpStartY - MAX_JUMP_HEIGHT;
-    player.velocityY += player.gravity * 6 * dt * 60; // slowly start falling down if above max jump height
-    jumpKeyHeld = false; // treat as if jump key was released
+    player.velocityY += player.gravity * 6 * dt * 60;
+    jumpKeyHeld = false;
   }
 
   // if the player has reached the ground, reset the y position and velocity, and handle landing state
@@ -636,6 +784,7 @@ function update(dt) {
     player.jumpStartY = GROUND_Y;
     player.jumpsUsed = 0;
   }
+
   // if the player is in the landing state, lower the timer until it reaches 0, then change the state back to stand
   if (player.state === "land") {
     player.landingTimer -= dt;
@@ -647,14 +796,18 @@ function update(dt) {
 }
 
 function updateGame(dt) {
+  const previousPlayerY = player.y;
+
   update(dt);
+  updateObstacles(dt);
+  handleObstacleCollision(previousPlayerY);
+
   coinMove(dt);
   coinPickup();
 }
 
 function drawGameFrame(dt) {
   drawSprite(dt);
-  drawCoin();
 }
 
 // function to draw the main menu screen
@@ -763,15 +916,17 @@ function spawnCoin(x, y) {
     collected: false,
   });
 }
+
 //function to update coins to move with the speed of the side scrolling
 function coinMove(dt) {
   coins.forEach((coin) => {
-    coin.x -= background.speed * dt * 60; // move coin to the left based on the background speed and delta time
+    coin.x -= background.speed * dt * 60;
   });
 
   // remove off-screen coins
   coins = coins.filter((coin) => coin.x + coin.width > 0);
 }
+
 //function to draw the all coins in the array coins
 function drawCoin() {
   coins.forEach((coin) => {
@@ -789,7 +944,7 @@ function drawPauseButton(isPaused = false) {
     PAUSE_BUTTON.x,
     PAUSE_BUTTON.y,
     PAUSE_BUTTON.size,
-    PAUSE_BUTTON.size,
+    PAUSE_BUTTON.size
   );
 
   CTX.fillStyle = "black";
@@ -807,7 +962,6 @@ function drawPauseButton(isPaused = false) {
   CTX.restore();
 }
 
-//
 function drawPauseOverlay() {
   CTX.save();
   CTX.fillStyle = "rgba(0, 0, 0, 0.45)";
@@ -818,6 +972,7 @@ function drawPauseOverlay() {
   CTX.textAlign = "center";
   CTX.textBaseline = "middle";
   CTX.fillText("PAUSED", CANVAS.width / 2, CANVAS.height / 4);
+
   // button for exiting to main menu and resuming game
   CTX.fillStyle = "#eeaa00";
   CTX.fillRect(CANVAS.width / 2 - 100, CANVAS.height / 2 - 30, 200, 60);
@@ -853,7 +1008,7 @@ window.addEventListener("beforeunload", saveGame);
 // function to save the game data (currently only coins) to localStorage as a JSON string
 function saveGame() {
   try {
-    updateGameState(); // make sure gameState is updated with current values before saving
+    updateGameState();
     const data = JSON.stringify(gameState);
     localStorage.setItem("myGameSave", data);
     console.log("Game saved!");
@@ -861,6 +1016,7 @@ function saveGame() {
     console.error("Save failed:", e);
   }
 }
+
 // function to load the game data from localStorage and parse it back into an object, or return null if no data is found
 function loadGame() {
   try {
@@ -875,6 +1031,7 @@ function loadGame() {
     return false;
   }
 }
+
 // Will apply the loaded game state to the current game, setting coins and shop items to the loaded values
 function applyGameState() {
   score = gameState.stats.highscore;
